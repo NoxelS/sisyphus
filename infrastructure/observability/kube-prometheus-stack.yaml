@@ -28,6 +28,14 @@ spec:
       create: true
     kubeEtcd:
       enabled: false
+    # Talos control-plane components and kube-proxy bind metrics to the host
+    # loopback address in this cluster, so pod-network scrapes cannot reach them.
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeProxy:
+      enabled: false
     alertmanager:
       enabled: true
       config:

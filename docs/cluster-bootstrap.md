@@ -134,6 +134,12 @@ installs pinned Prometheus community, Grafana community, and Grafana charts:
 - Loki in one-replica monolithic mode with filesystem storage;
 - Grafana Alloy as a DaemonSet collecting Kubernetes container logs.
 
+The chart's scheduler, controller-manager, kube-proxy, and etcd ServiceMonitors
+are disabled because those Talos-managed components do not expose their metrics
+to the pod network in the current machine configuration. Kubernetes API,
+kubelet, cAdvisor, node, Cilium, Hubble, Flux, cloudflared, and observability
+component targets remain enabled.
+
 The `observability-config` Kustomization waits for `observability` so the
 Prometheus Operator CRDs exist before ServiceMonitors, PodMonitors, and
 PrometheusRules are applied. It also provisions the Loki data source, the
