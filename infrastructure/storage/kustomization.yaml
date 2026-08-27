@@ -4,6 +4,16 @@ resources:
   - https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.36/deploy/local-path-storage.yaml
 patches:
   - target:
+      kind: Namespace
+      name: local-path-storage
+    patch: |-
+      - op: add
+        path: /metadata/labels
+        value:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
+  - target:
       kind: StorageClass
       name: local-path
     patch: |-
