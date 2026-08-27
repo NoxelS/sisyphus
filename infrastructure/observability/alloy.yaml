@@ -29,11 +29,6 @@ spec:
       enableReporting: false
       mounts:
         varlog: true
-      extraEnv:
-        - name: HOSTNAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
       resources:
         requests:
           cpu: 50m
