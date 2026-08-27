@@ -5,14 +5,10 @@ metadata:
   namespace: kite
 spec:
   interval: 30m
-  chart:
-    spec:
-      chart: postgresql
-      version: 18.8.12
-      sourceRef:
-        kind: HelmRepository
-        name: bitnami
-        namespace: kite
+  chartRef:
+    kind: OCIRepository
+    name: postgresql
+    namespace: kite
   install:
     createNamespace: false
     remediation:
