@@ -5,6 +5,8 @@ metadata:
   namespace: kite
 spec:
   interval: 30m
+  dependsOn:
+    - name: postgresql
   chart:
     spec:
       chart: kite
