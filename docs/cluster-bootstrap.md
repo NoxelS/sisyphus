@@ -9,8 +9,8 @@ version-pinned vendor documentation.
 Sisyphus currently runs as one schedulable control-plane node at Netcup. It is
 not highly available: a node, disk, provider, or network failure takes the
 cluster offline. Talos is the host operating system, Kubernetes is the
-orchestrator, and Cilium is the active CNI. Flux has not yet become the
-in-cluster source of truth until its bootstrap is completed.
+orchestrator, and Cilium is the active CNI. Flux has been bootstrapped and is
+the in-cluster source of truth.
 
 ## Talos installation
 
@@ -35,8 +35,10 @@ must always be taken from Netcup SCP; they must not be guessed.
 The final machine configuration must retain this network configuration so a
 reboot does not return the node to maintenance mode without networking. Public
 management ports should be restricted by the provider/host firewall to the
-administrator's temporary source address and removed once private management
-access is available. Cloudflare Tunnel does not require public origin ports.
+administrator's source address. Keep Talos TCP 50000 and Kubernetes TCP 6443
+reachable only from that restricted address until private management is
+available. Do not expose public origin ports: Cloudflare Tunnel does not
+require inbound HTTP or HTTPS on the node.
 
 ## Kubernetes bootstrap
 
@@ -48,7 +50,7 @@ enabled for the first Cilium deployment. The sequence is:
 2. Bootstrap the single etcd member exactly once.
 3. Retrieve the kubeconfig.
 4. Install Cilium once manually so the node can become Ready.
-5. Bootstrap Flux once from a trusted workstation.
+5. Bootstrap Flux once from a trusted workstation (completed).
 
 The Cilium installation used Kubernetes IPAM, kube-proxy replacement disabled,
 Talos's existing cgroup v2 mount, and a capability set without `SYS_MODULE`.
@@ -70,6 +72,43 @@ helm upgrade --install cilium cilium/cilium \
   --set securityContext.capabilities.cleanCiliumState="{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}"
 ```
 
+## Storage
+
+The cluster currently uses Rancher's local-path provisioner v0.0.36. Its
+`local-path` StorageClass writes to `/var/mnt/local-path` on this node, is not
+the default class, and has `Retain` reclaim policy. PostgreSQL requests one
+2 GiB `ReadWriteOnce` volume through that class. This is node-local storage:
+it is neither replicated nor a backup. Preserve the PVC and copy data to an
+off-node backup target before replacing or reinstalling the node.
+
+Longhorn remains intentionally undeployed. Before introducing it, decide the
+dedicated data disk, Talos mount/UserVolumeConfig, replica count appropriate
+for the eventual node count, and backup target.
+
+## Cloudflare Tunnel and applications
+
+The `cloudflare-tunnel` Flux Kustomization deploys two `cloudflared` replicas
+using a SOPS-encrypted tunnel token. The public hostname and service mapping
+are configured in the Cloudflare dashboard. The tunnel connects outbound to
+the cluster; no NodePort, LoadBalancer, Kubernetes Ingress, Gateway, Traefik,
+or Caddy is required for Kite.
+
+The `kite` Flux Kustomization waits for the storage Kustomization. Kite runs
+one replica with anonymous users disabled, uses the standalone PostgreSQL
+HelmRelease, and has its chart Ingress and Gateway disabled. The PostgreSQL
+credentials and Kite encryption key are SOPS-encrypted and must never be
+decoded into Git or logs.
+
+## Network policy and firewall boundary
+
+Cilium is the active CNI, but kube-proxy remains enabled and kube-proxy
+replacement is disabled. No repository-managed default-deny Cilium policy or
+Talos ingress-firewall configuration exists yet. The Netcup/provider firewall
+is therefore the current public boundary. Keep public HTTP/HTTPS, NodePorts,
+and cluster-internal ports blocked; allow only restricted administration and
+stateful return traffic. Add explicit Cilium policies for `cloudflared`, Kite,
+and PostgreSQL before claiming pod ingress or egress is restricted.
+
 ## Secrets
 
 SOPS uses two public age recipients: Noel's personal key and the Flux cluster
@@ -80,17 +119,14 @@ before Flux reconciles encrypted manifests.
 Never paste `talosconfig`, the generated machine configuration, age private
 keys, or decoded Kubernetes secrets into an issue, chat, or commit.
 
-## Next platform layers
+## Remaining platform work
 
-After Flux bootstrap, reconcile platform components in this order:
+Remaining work includes:
 
-1. namespaces and Pod Security policy;
-2. Cilium Helm values and network policies;
-3. Longhorn with a dedicated data volume, single-node replica policy, and
-   off-cluster backups;
-4. observability and alerts;
-5. Cloudflare Tunnel deployment using a dashboard-created tunnel token;
-6. personal applications.
+1. Cilium Helm values and network policies;
+2. Longhorn with a dedicated data volume, replica policy, and off-cluster
+   backups;
+3. observability and alerts.
 
 Longhorn is not ready to deploy while only `/dev/vda` is available as both the
 Talos system disk and the only visible storage device. A separate data volume,
