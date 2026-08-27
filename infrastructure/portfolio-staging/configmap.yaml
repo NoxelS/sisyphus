@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: portfolio-config
+  namespace: portfolio-staging
+data:
+  PUBLIC_DEPLOYMENT_ENV: staging
+  PUBLIC_CLOUDFLARE_IMAGE_RESIZING: "false"
+  PUBLIC_CONTACT_EMAIL: contact@noel.fyi
+  PUBLIC_CONTACT_PHONE: "+49 178 233 94 87"
+  PUBLIC_CONTACT_PHONE_SECONDARY: "+39 352 275 4346"
+  PUBLIC_KOALENDAR_URL: https://koalendar.com/e/noel-pascal-schwabenland

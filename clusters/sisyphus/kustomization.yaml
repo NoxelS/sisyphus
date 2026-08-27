@@ -8,3 +8,4 @@ resources:
   - observability.yaml
   - observability-config.yaml
   - kite.yaml
+  - portfolio-staging.yaml
