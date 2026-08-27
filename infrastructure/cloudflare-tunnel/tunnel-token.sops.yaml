@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: cloudflare-tunnel-token
+    namespace: cloudflare-tunnel
+type: Opaque
+stringData:
+    token: ENC[AES256_GCM,data:59PKj7ZRoc82rEPRNjmx7v4jIrJNLofNKGG1TEx9f6l+pyPWGE8WyZbKAcUj6V1w31wCvYxrCsNf1NGiefLrY4GpuXT0UeH1q+tpoWIrcjVKAe3aAA4vxhNl4lMHWzUwzMbIfWxk4HW4EzaP85FybFOQSRIx4t+pFMw+e0FULi+4vZaCzBFGJdAZ3WLB3AEIeVmAncoVC/PNcPBqNbsCLAoNIF8F0DHsylKVAcJHa+0t+UjAGQcPaw==,iv:3+or4MKy2kWLvDZpqQztA/2xlFxV595sw9dMp36G5Ko=,tag:kq3GFwmXo8dHxJjNxCsuBQ==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBOUC96a0NCQm5PQVZ2ZEhY
+            MWxiLzk5NldJMWM2QnIxRzR4NEZmU2lIMkdFCmh4SjZKQWRhTnNRVmF4UWpsUkVD
+            R0hXMmRpQkZqblZ5TkhVWE91ZGROUjgKLS0tIHpjbkJIYU83bHlvU2p0SklOMW5T
+            N2FvQjc3MFIxZVAwVXFqNEJ4Rk9KbzgKkWeIHlBf3Lhn1K/qL+JaXSB6Z+zYG42M
+            o6EKzDvlgCvY4FrpVMImKcEY5ISf76eh4uYB2W+SJScK8avDsLf9iA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age18rzcjdhhf4kdfnkjnj7uwmtt36lu5r3kzvdfpdeu78kau73ekqgsfh222y
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBHR1NhdExTSE9PWSt5M1lO
+            YTBUWG96WUVjQlhLMjgzL3ppRmNlbFpOc3hrCjYySDJCNkg2S3lwVUNEblErNkVm
+            UUlYR0ZTM1ZjR2FRREVkRldjWnFlc2sKLS0tIFRDQndRdXh1bVdGR1ZlTnlWS2I1
+            eFFVZDUrMmVValU4SzRVYmZIWUtnL2MKAqjH8aSlzNceDmoVJgQ+sAhzMEL8LbJC
+            slctwQUd0dBeitWY3K3h3io8/resKUJc0FOUEvqZ7GRflcUd3vI4CQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1z9y7aurkjwxu75dckqnt27f0kds4tecf9m9ctpptg43e9un7vp6qpf8ext
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-08-27T10:38:04Z"
+    mac: ENC[AES256_GCM,data:IZO4CTENR2ZSHHu2Ws3SFhi8Esan/hmMde58f47rIxMiSBsAJaZ1sEqzZ32S0NTr9iA60SmZFFhuzNSYOx6+nvoQ7iT6UW7q/YdIE/SSeFj9qgXStywS9vUSc2dWG8HTO8mO7RraUowLflzTNO9Y7QNXPpukyMwOx5Nfk0bcNvI=,iv:Q6uOyh4d3D+/H2MN1JGpDATeTyzDgalB+EM4VLciN+M=,tag:uNGG7pqJeHRZE8YadSvyUA==,type:str]
+    version: 3.13.0
