@@ -51,6 +51,8 @@ enabled for the first Cilium deployment. The sequence is:
 3. Retrieve the kubeconfig.
 4. Install Cilium once manually so the node can become Ready.
 5. Bootstrap Flux once from a trusted workstation (completed).
+6. Let the `cilium` Flux Kustomization adopt and manage the existing Helm
+   release.
 
 The Cilium installation used Kubernetes IPAM, kube-proxy replacement disabled,
 Talos's existing cgroup v2 mount, and a capability set without `SYS_MODULE`.
@@ -71,6 +73,23 @@ helm upgrade --install cilium cilium/cilium \
   --set securityContext.capabilities.ciliumAgent="{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}" \
   --set securityContext.capabilities.cleanCiliumState="{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}"
 ```
+
+After bootstrap, Cilium is owned by Flux from `infrastructure/cilium`. The
+HelmRelease preserves the bootstrap IPAM, kube-proxy, cgroup, routing, and
+capability settings and additionally enables Hubble, Hubble Relay, and their
+Prometheus metrics. Do not run ad-hoc Helm upgrades after Flux takes ownership.
+
+Hubble Relay is cluster-internal. From a trusted workstation with the Cilium
+and Hubble CLIs installed, inspect flows through a local port-forward:
+
+```sh
+cilium status
+cilium hubble port-forward
+hubble status
+hubble observe
+```
+
+Do not publish Hubble Relay through Cloudflare, a NodePort, or a load balancer.
 
 ## Storage
 
@@ -99,6 +118,50 @@ HelmRelease, and has its chart Ingress and Gateway disabled. The PostgreSQL
 credentials and Kite encryption key are SOPS-encrypted and must never be
 decoded into Git or logs.
 
+The dashboard-managed tunnel should also map `grafana.noel.fyi` to the stable
+in-cluster service `http://grafana.monitoring.svc.cluster.local:80`. Grafana is
+the only observability UI intended for public routing. Prometheus, Alertmanager,
+Loki, Alloy, and Hubble Relay remain cluster-internal. Protect Grafana with a
+Cloudflare Access policy in addition to its generated administrator password.
+
+## Observability
+
+The `observability` Flux Kustomization depends on storage and Cilium and
+installs pinned Prometheus community, Grafana community, and Grafana charts:
+
+- kube-prometheus-stack with Prometheus, Alertmanager, Grafana,
+  kube-state-metrics, and node-exporter;
+- Loki in one-replica monolithic mode with filesystem storage;
+- Grafana Alloy as a DaemonSet collecting Kubernetes container logs.
+
+The `observability-config` Kustomization waits for `observability` so the
+Prometheus Operator CRDs exist before ServiceMonitors, PodMonitors, and
+PrometheusRules are applied. It also provisions the Loki data source, the
+Sisyphus overview dashboard, initial platform alerts, and the monitoring
+namespace Cilium policy.
+
+Persistent observability data uses explicit `local-path` volumes:
+
+- Prometheus: 20 GiB, seven-day time retention, 15 GiB size retention;
+- Loki: 20 GiB, seven-day retention;
+- Grafana: 2 GiB;
+- Alertmanager: 1 GiB.
+
+These volumes use `Retain`, but they remain on the single node and are neither
+replicated nor backed up. Dashboards and data-source definitions belong in Git;
+metrics and logs are disposable during node recovery unless an off-node backup
+or remote storage target is added later.
+
+Alertmanager initially routes to a null receiver so the stack can evaluate and
+display alerts without embedding an undecided notification credential. Add a
+SOPS-encrypted external receiver before treating alert delivery as operational.
+
+Grafana credentials are stored only in
+`infrastructure/observability/grafana-admin.sops.yaml`. To rotate the password,
+edit that file with SOPS, let Flux reconcile it, and restart the Grafana
+StatefulSet through a declarative rollout change or a controlled operational
+restart. Never put the decoded value into Helm values or documentation.
+
 ## Network policy and firewall boundary
 
 Cilium is the active CNI, but kube-proxy remains enabled and kube-proxy
@@ -123,10 +186,11 @@ keys, or decoded Kubernetes secrets into an issue, chat, or commit.
 
 Remaining work includes:
 
-1. Cilium Helm values and network policies;
-2. Longhorn with a dedicated data volume, replica policy, and off-cluster
-   backups;
-3. observability and alerts.
+1. application-specific network policies informed by Hubble observations;
+2. an external Alertmanager notification receiver;
+3. off-node etcd, PostgreSQL, metrics, and log recovery arrangements;
+4. Longhorn with a dedicated data volume, replica policy, and off-cluster
+   backups.
 
 Longhorn is not ready to deploy while only `/dev/vda` is available as both the
 Talos system disk and the only visible storage device. A separate data volume,

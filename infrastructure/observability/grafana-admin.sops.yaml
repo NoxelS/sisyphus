@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: grafana-admin
+    namespace: monitoring
+type: Opaque
+stringData:
+    admin-user: ENC[AES256_GCM,data:emlqxXg=,iv:aJssVcd4+sWu5tcYRxrCqW66rNC/zzyEBOXcUHVIdGw=,tag:iudrsNms0w8rIGsRpdK1UQ==,type:str]
+    admin-password: ENC[AES256_GCM,data:DaV8d79eJ9D18GoopEfiUziAwgCMn/Nu8DHvoyMgXMNarfTSuHOkmErkzlSQrgfQjFwAoWyv8E5wsi9j6px5TQ==,iv:gy2yHX8rXQ7rFNUTO320uk/+FusJoHM2FVKT22Yxrgo=,tag:YD5F8TNvnMHgeiqkAj4x0g==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBMOTN2TGptbjV0MWJpcGIy
+            c21aeXpVTnR4TEs2QWIvbjd1ZkIvd2VWUDIwClRYVUNKZnRSZFF4WjVZaHpSbTBG
+            dmdQOElVYTN6Zkp4VHF4bGxwOCtUUVkKLS0tIHpDZzBIMWczbzk4azlkV3B5ODB3
+            TXNwZUhmTitxUE9NVWRob3E0NVlsc2sKkXB0ISYAzlF+DMMl4M4pkrpwq+7z8hCM
+            RI1luspZEopABJffPWY6WDjLTh3IQTn1sMkYLLdxDmARe2IFDAYeaw==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age18rzcjdhhf4kdfnkjnj7uwmtt36lu5r3kzvdfpdeu78kau73ekqgsfh222y
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA2L2JPKys1R0t3Tmp6blAv
+            L0NFa3dhdU1mbDh4OHVhVUs0dGI3QmU5Wmg0Cm41RUJNdkQ5a1ZTK0hzWUJPM1g4
+            OHpFeldLYmVXemhvdjhMdEJTNDRpM0EKLS0tIFNPa0RWNXUrMEhaa1ZUeGJpV1Fp
+            THh1S1BRdEtaVFhZM3d0dVRLZ0RqL2sKn5pBg7Bgc76cz13sbNojswNr+oKs6ksd
+            eWJNJgkUyx/UjNgC8gmuhutEQ6FOU97OsDceTu99hH9taEYz+7L5/Q==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1z9y7aurkjwxu75dckqnt27f0kds4tecf9m9ctpptg43e9un7vp6qpf8ext
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-08-27T12:29:09Z"
+    mac: ENC[AES256_GCM,data:WgmXNRG4dHXyfqmIKxQatBD0p+ttvciVeUtn1n+rN3lgZKtnP+CXAAGKk7xtbIGRRzAFPFiOZXVVH2LLbNEOA9V1GYfNwt2P+x4auSgxqQn7EehKMQAdex+7hWnNpsCwgp16SviokSuyECXzq1yEG7Y0/gQz/BptDmq33FPXEXQ=,iv:MSw1yrvuwSbwZ5liA05t+fO9cT74K+RzPo0BfOkfN+E=,tag:e0chUR7BpGg6O2S+Vhdsgg==,type:str]
+    version: 3.13.0

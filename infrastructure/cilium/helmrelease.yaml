@@ -1,0 +1,86 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cilium
+  namespace: kube-system
+spec:
+  releaseName: cilium
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: cilium
+    namespace: kube-system
+  install:
+    createNamespace: false
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    cluster:
+      name: sisyphus
+    ipam:
+      mode: kubernetes
+    kubeProxyReplacement: false
+    routingMode: tunnel
+    tunnelProtocol: vxlan
+    bpf:
+      hostLegacyRouting: true
+    cgroup:
+      autoMount:
+        enabled: false
+      hostRoot: /sys/fs/cgroup
+    operator:
+      replicas: 1
+      prometheus:
+        enabled: true
+        metricsService: true
+    prometheus:
+      enabled: true
+      metricsService: true
+    envoy:
+      prometheus:
+        enabled: true
+    securityContext:
+      capabilities:
+        ciliumAgent:
+          - CHOWN
+          - KILL
+          - NET_ADMIN
+          - NET_RAW
+          - IPC_LOCK
+          - SYS_ADMIN
+          - SYS_RESOURCE
+          - DAC_OVERRIDE
+          - FOWNER
+          - SETGID
+          - SETUID
+        cleanCiliumState:
+          - NET_ADMIN
+          - SYS_ADMIN
+          - SYS_RESOURCE
+    hubble:
+      enabled: true
+      metrics:
+        enableOpenMetrics: true
+        enabled:
+          - dns:query;ignoreAAAA
+          - drop
+          - tcp
+          - flow
+          - httpV2
+      relay:
+        enabled: true
+        replicas: 1
+        prometheus:
+          enabled: true
+        resources:
+          requests:
+            cpu: 25m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+      ui:
+        enabled: false

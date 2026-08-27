@@ -4,4 +4,7 @@ resources:
   - flux-system
   - cloudflare-tunnel.yaml
   - storage.yaml
+  - cilium.yaml
+  - observability.yaml
+  - observability-config.yaml
   - kite.yaml

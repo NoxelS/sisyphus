@@ -1,0 +1,69 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sisyphus-platform
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: observability
+spec:
+  groups:
+    - name: sisyphus.platform
+      rules:
+        - alert: SisyphusNodeFilesystemFilling
+          expr: |-
+            (
+              node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"}
+              /
+              node_filesystem_size_bytes{fstype!~"tmpfs|overlay"}
+            ) < 0.20
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Node filesystem has less than 20% free space
+        - alert: SisyphusNodeFilesystemCritical
+          expr: |-
+            (
+              node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"}
+              /
+              node_filesystem_size_bytes{fstype!~"tmpfs|overlay"}
+            ) < 0.10
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Node filesystem has less than 10% free space
+        - alert: SisyphusPersistentVolumeFilling
+          expr: |-
+            kubelet_volume_stats_available_bytes
+              /
+            kubelet_volume_stats_capacity_bytes < 0.20
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Persistent volume has less than 20% free space
+        - alert: FluxReconciliationStalled
+          expr: |-
+            gotk_reconcile_condition{type="Ready",status="False"} == 1
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Flux reconciliation has failed for 15 minutes
+        - alert: CloudflareTunnelUnavailable
+          expr: |-
+            kube_deployment_status_replicas_available{namespace="cloudflare-tunnel",deployment="cloudflared"} < 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: No Cloudflare Tunnel replica is available
+        - alert: HubbleRelayUnavailable
+          expr: |-
+            kube_deployment_status_replicas_available{namespace="kube-system",deployment="hubble-relay"} < 1
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Hubble Relay is unavailable

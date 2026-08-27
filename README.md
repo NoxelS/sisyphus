@@ -2,10 +2,11 @@
 
 Single-node Talos/Kubernetes infrastructure managed with Flux.
 
-The current cluster runs Cilium, Cloudflare Tunnel, Kite, standalone
-PostgreSQL, and node-local persistent storage through Rancher local-path. It
-is not highly available and local-path volumes are not replicated or backed
-up automatically.
+The current cluster runs Flux-managed Cilium with Hubble Relay, Cloudflare
+Tunnel, Kite, standalone PostgreSQL, Prometheus, Alertmanager, Grafana, Loki,
+Grafana Alloy, and node-local persistent storage through Rancher local-path.
+It is not highly available and local-path volumes are not replicated or
+backed up automatically.
 
 See [the bootstrap and recovery guide](docs/cluster-bootstrap.md) for current
 topology, ownership, storage, networking, firewall, and remaining-work
