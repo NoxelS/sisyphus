@@ -1,0 +1,8 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: kite
+  namespace: kite
+spec:
+  interval: 1h
+  url: https://kite-org.github.io/kite

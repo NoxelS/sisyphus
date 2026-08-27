@@ -1,0 +1,45 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: postgresql
+  namespace: kite
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: postgresql
+      version: 18.8.12
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: kite
+  install:
+    createNamespace: false
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    architecture: standalone
+    auth:
+      existingSecret: postgresql-credentials
+      username: kite
+      database: kite
+      secretKeys:
+        adminPasswordKey: postgres-password
+        userPasswordKey: password
+    primary:
+      persistence:
+        enabled: true
+        storageClass: local-path
+        accessModes:
+          - ReadWriteOnce
+        size: 2Gi
+      resources:
+        requests:
+          cpu: 50m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
