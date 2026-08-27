@@ -4,7 +4,7 @@ metadata:
   name: portfolio-staging
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 15s
   path: ./infrastructure/portfolio-staging
   prune: true
   wait: true
