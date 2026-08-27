@@ -43,6 +43,26 @@ spec:
             severity: warning
           annotations:
             summary: Persistent volume has less than 20% free space
+        - alert: SisyphusNodeMemoryPressure
+          expr: |-
+            node_memory_MemAvailable_bytes
+              /
+            node_memory_MemTotal_bytes < 0.15
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Node has less than 15% available memory
+        - alert: SisyphusNodeCPUHigh
+          expr: |-
+            1 - avg by (instance) (
+              rate(node_cpu_seconds_total{mode="idle"}[5m])
+            ) > 0.85
+          for: 20m
+          labels:
+            severity: warning
+          annotations:
+            summary: Node CPU usage has exceeded 85% for 20 minutes
         - alert: FluxReconciliationStalled
           expr: |-
             gotk_reconcile_condition{type="Ready",status="False"} == 1

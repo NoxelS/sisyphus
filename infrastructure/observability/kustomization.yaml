@@ -4,6 +4,7 @@ resources:
   - namespace.yaml
   - repositories.yaml
   - grafana-admin.sops.yaml
+  - proton-smtp.sops.yaml
   - kube-prometheus-stack.yaml
   - loki.yaml
   - alloy.yaml

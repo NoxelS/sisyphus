@@ -1,0 +1,17 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: alertmanager-proton-smtp
+  namespace: monitoring
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: alertmanager
+      alertmanager: monitoring-alertmanager
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "587"
+              protocol: TCP

@@ -56,6 +56,11 @@ spec:
         receivers:
           - name: "null"
       alertmanagerSpec:
+        alertmanagerConfigSelector:
+          matchLabels:
+            alertmanager: monitoring
+        alertmanagerConfigMatcherStrategy:
+          type: None
         retention: 120h
         resources:
           requests:

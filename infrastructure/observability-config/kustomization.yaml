@@ -4,6 +4,9 @@ resources:
   - datasources.yaml
   - dashboards/sisyphus-overview.yaml
   - alerts/platform-alerts.yaml
+  - alertmanager/proton-email.yaml
+  - flux-notifications.yaml
   - monitors/platform-podmonitors.yaml
   - monitors/cilium-servicemonitors.yaml
   - network-policy.yaml
+  - smtp-network-policy.yaml

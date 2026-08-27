@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: proton-smtp
+    namespace: monitoring
+type: Opaque
+stringData:
+    smtp-password: ENC[AES256_GCM,data:+U0lMFJh/yuXktWzzroxDA==,iv:K02shIpdQxHguh9H+BQRsyKZnBJCnx/S1BQ4wDSLBz8=,tag:I2Pd2CoKSyBsJhqw01+LJw==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBGMjl0RVZyVVNqSVBqSGVF
+            NGVrTVJRUDRyb08wdCtIUDE3MzFPeG84c0NjClJ2REhZRXZ0TTFwM1RvakIzOEMv
+            MnhiMHRvTFJ0Vy9COGRPcjNqczNPam8KLS0tIDZVV3pPVU1QUG9RZG0yK1NxZ21v
+            d2cxNWl5MzlNUDBBL2p3emVSODF0YzAK+u0ESLAUZa177QU+F+Y3qYc/JAVU8hO3
+            wnb8xGvUrT59EOSMEI14ehpAcJpzVwmrqrEYbZ4EKPzpq8Ors5Ng1A==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age18rzcjdhhf4kdfnkjnj7uwmtt36lu5r3kzvdfpdeu78kau73ekqgsfh222y
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBsalZzenZoSVpvTmR3YnFW
+            K3JaYjZpdEVjSmRCL1lJZEtaZit3NWFnMXpvCk9XQVlWQ1RnVytGa3FmUjZzSm16
+            SDdUYkxkU3M4V1V4SVZTU0srS2ZNVVkKLS0tIFRGMittNlJveFBXYTExRUFxd0k4
+            Slp0WHA0dmE0WTdLSG9ZTWR0Z2pWZG8KohhfYCc1rsVUIebv5sudEuFL2NJEsTsm
+            X+TRy/G6OmBObX9re5/ZeU76UtXyVr+d/p9txbVboxayvalpgvmVKw==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1z9y7aurkjwxu75dckqnt27f0kds4tecf9m9ctpptg43e9un7vp6qpf8ext
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-08-27T14:02:50Z"
+    mac: ENC[AES256_GCM,data:5Ds+XXeZyFsC8jDL8vl3+KlnRX0OQAoG6DK0aEJJxZutZW3AQMzAeu/VF+zvNUn7uaNkD6b7g2w7UBhUv9UGjnq0zBZIbX9D5RJ7fRTA7l1fVNnS3LhNeKUqGdJLNvE2vXrg1Oq03lkVFriuSKVzEWrEPGD/aFjdCxEVpOHNUZA=,iv:+731JQPEdqQxiRNeXUKuZw+hiGSxIXJKXLqTDItMEXc=,tag:Cc84pAcHgIteaoPA6WaKQQ==,type:str]
+    version: 3.13.0

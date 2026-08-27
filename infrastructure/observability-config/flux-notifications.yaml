@@ -1,0 +1,60 @@
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: alertmanager
+  namespace: flux-system
+spec:
+  type: alertmanager
+  address: http://monitoring-alertmanager.monitoring.svc.cluster.local:9093/api/v2/alerts/
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: reconciliation-errors
+  namespace: flux-system
+spec:
+  providerRef:
+    name: alertmanager
+  eventSeverity: error
+  eventMetadata:
+    cluster: sisyphus
+    source: flux
+  eventSources:
+    - kind: GitRepository
+      name: "*"
+    - kind: OCIRepository
+      name: "*"
+    - kind: HelmRelease
+      name: "*"
+    - kind: Kustomization
+      name: "*"
+    - kind: ImageRepository
+      name: "*"
+    - kind: ImagePolicy
+      name: "*"
+    - kind: ImageUpdateAutomation
+      name: "*"
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: successful-deployments
+  namespace: flux-system
+spec:
+  providerRef:
+    name: alertmanager
+  eventSeverity: info
+  eventMetadata:
+    cluster: sisyphus
+    source: flux
+  inclusionList:
+    - "Health check passed"
+    - "pushed commit"
+    - "(?i)(install|upgrade).*succeeded"
+  eventSources:
+    - kind: HelmRelease
+      name: "*"
+    - kind: Kustomization
+      name: "*"
+    - kind: ImageUpdateAutomation
+      name: "*"
