@@ -1,0 +1,6 @@
+creation_rules:
+  - path_regex: ^kubernetes/.*/.*\.enc\.ya?ml$
+    encrypted_regex: ^(data|stringData)$
+    age: >-
+      age18rzcjdhhf4kdfnkjnj7uwmtt36lu5r3kzvdfpdeu78kau73ekqgsfh222y,
+      age1z9y7aurkjwxu75dckqnt27f0kds4tecf9m9ctpptg43e9un7vp6qpf8ext

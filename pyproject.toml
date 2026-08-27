@@ -1,0 +1,20 @@
+[project]
+name = "sisyphus"
+version = "0.1.0"
+description = "GitOps-managed Talos infrastructure for the Sisyphus cluster"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12,<0.13",
+    "yamllint>=1.37,<1.38",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
