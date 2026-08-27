@@ -7,7 +7,7 @@ metadata:
     alertmanager: monitoring
 spec:
   route:
-    receiver: proton-email
+    receiver: discard
     groupBy:
       - alertname
       - namespace
@@ -27,6 +27,25 @@ spec:
         repeatInterval: 4h
       - receiver: proton-email
         matchers:
+          - name: severity
+            matchType: "="
+            value: warning
+        groupWait: 5m
+        groupInterval: 5m
+        repeatInterval: 12h
+      - receiver: proton-email
+        matchers:
+          - name: source
+            matchType: "="
+            value: flux
+          - name: severity
+            matchType: "="
+            value: error
+        groupWait: 1m
+        groupInterval: 5m
+        repeatInterval: 6h
+      - receiver: proton-email
+        matchers:
           - name: source
             matchType: "="
             value: flux
@@ -37,6 +56,7 @@ spec:
         groupInterval: 5m
         repeatInterval: 24h
   receivers:
+    - name: discard
     - name: proton-email
       emailConfigs:
         - to: noel@schwabenland.ch
