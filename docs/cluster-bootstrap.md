@@ -202,3 +202,23 @@ Longhorn is not ready to deploy while only `/dev/vda` is available as both the
 Talos system disk and the only visible storage device. A separate data volume,
 Talos `UserVolumeConfig`, kubelet `rshared` mount, and backup target must be
 decided first.
+
+## Dependency and image update workflow
+
+Renovate is intended to run as the GitHub App for this repository. It opens
+reviewable pull requests for Helm chart versions, Kubernetes container images,
+GitHub Actions, and Python tooling. Renovate must not receive cluster
+credentials or SOPS private keys. Major upgrades remain manually approved from
+the Renovate Dependency Dashboard; generated Flux manifests and encrypted
+secret files are excluded.
+
+Flux remains the deployment source of truth. The portfolio staging
+`ImageUpdateAutomation` discovers new GHCR tags and pushes its setter commit to
+`flux/portfolio-staging-image`. GitHub Actions opens or updates a pull request
+from that branch into `main`. Flux reconciles the change only after the pull
+request is reviewed and merged. Do not change this automation back to pushing
+directly to `main`.
+
+Before enabling this workflow, configure GitHub branch protection for `main` to
+require pull requests and the infrastructure validation workflow, disallow
+force pushes, and restrict the Flux deploy key to its automation branch.

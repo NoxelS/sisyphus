@@ -1,0 +1,24 @@
+name: Validate infrastructure
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Lint YAML
+        run: uv run --no-project --with yamllint==1.37.1 yamllint -d relaxed .
+      - name: Check Python project metadata
+        run: uv run --no-project --with ruff==0.12.10 ruff check .
+      - name: Check SOPS configuration
+        run: test -s .sops.yaml

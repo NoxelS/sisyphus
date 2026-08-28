@@ -43,9 +43,12 @@ spec:
       messageTemplate: |
         chore(portfolio): update staging image
 
-        {{range .Changed.Changes}}{{print .OldValue}} -> {{println .NewValue}}{{end}}
+        {{- range .Changed.Changes -}}
+        {{ print .OldValue }} -> {{ println .NewValue }}
+        {{- end }}
     push:
-      branch: main
+      # Flux updates are reviewed through a GitHub PR before main changes.
+      branch: flux/portfolio-staging-image
   update:
     path: ./infrastructure/portfolio-staging
     strategy: Setters

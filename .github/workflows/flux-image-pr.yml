@@ -1,0 +1,39 @@
+name: Open Flux image update PR
+
+on:
+  push:
+    branches:
+      - 'flux/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: flux-image-pr-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  pull-request:
+    if: startsWith(github.ref, 'refs/heads/flux/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open or update pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --base main \
+            --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number')"
+          if [ -n "$existing_pr" ]; then
+            echo "Flux image update PR #$existing_pr already exists"
+            exit 0
+          fi
+          body='Flux detected a new portfolio staging image. Review the generated manifest change and CI checks before merging.'
+          gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$HEAD_BRANCH" \
+            --title "chore(portfolio): update staging image" \
+            --body "$body"

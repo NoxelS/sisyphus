@@ -1,0 +1,40 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticPrefixFixDepsChoreOthers"
+  ],
+  "enabledManagers": [
+    "flux",
+    "helm-values",
+    "kubernetes",
+    "pep621",
+    "github-actions"
+  ],
+  "kubernetes": {
+    "managerFilePatterns": [
+      "/^infrastructure\\/.+\\.ya?ml$/",
+      "/^clusters\\/sisyphus\\/(?!flux-system\\/gotk-components\\.yaml$).+\\.ya?ml$/"
+    ]
+  },
+  "ignorePaths": [
+    "**/*.sops.yaml",
+    "clusters/sisyphus/flux-system/gotk-components.yaml",
+    "infrastructure/portfolio-staging/deployment.yaml"
+  ],
+  "dependencyDashboard": true,
+  "prConcurrentLimit": 5,
+  "labels": ["dependencies", "infrastructure"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true,
+      "labels": ["dependencies", "major"]
+    },
+    {
+      "matchDatasources": ["docker"],
+      "pinDigests": true,
+      "labels": ["dependencies", "container"]
+    }
+  ]
+}
