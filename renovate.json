@@ -14,7 +14,7 @@
   "kubernetes": {
     "managerFilePatterns": [
       "/^infrastructure\\/.+\\.ya?ml$/",
-      "/^clusters\\/sisyphus\\/(?!flux-system\\/gotk-components\\.yaml$).+\\.ya?ml$/"
+      "/^clusters\\/sisyphus\\/.+\\.ya?ml$/"
     ]
   },
   "ignorePaths": [
