@@ -4,7 +4,7 @@ metadata:
   name: portfolio-frontend
   namespace: flux-system
 spec:
-  image: ghcr.io/noxels/portfolio-frontend
+  image: ghcr.io/noxels/portfolio-frontend@sha256:2be0aed1b82d2ed97511a0c86c339354f73d23c551a7d91d1a2f49ed443afd3a
   interval: 5m
 ---
 apiVersion: image.toolkit.fluxcd.io/v1
