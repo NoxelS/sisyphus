@@ -5,6 +5,7 @@ resources:
   - cloudflare-tunnel.yaml
   - storage.yaml
   - cilium.yaml
+  - tailscale.yaml
   - observability.yaml
   - observability-config.yaml
   - kite.yaml

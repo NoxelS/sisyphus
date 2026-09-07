@@ -124,6 +124,58 @@ the only observability UI intended for public routing. Prometheus, Alertmanager,
 Loki, Alloy, and Hubble Relay remain cluster-internal. Protect Grafana with a
 Cloudflare Access policy in addition to its generated administrator password.
 
+## Tailscale travel exit node
+
+The `tailscale` Flux Kustomization installs the official Tailscale Kubernetes
+Operator and one `sisyphus-exit` Connector. The Connector is a single pod that
+advertises itself as an exit node: a travel device explicitly selecting it
+sends internet-bound traffic through the cluster and exits through the
+server's Netcup public address.
+
+Talos itself does not run Tailscale and its own traffic is unaffected. The
+Connector intentionally has no subnet routes, Tailscale Ingress, Funnel,
+cluster Egress service, or Kubernetes API proxy, so it is not a path into the
+node or cluster workloads. The single-node cluster is not highly available;
+the exit node is unavailable during node, CNI, operator, or provider outages.
+
+Before Flux can authenticate the operator, edit
+`infrastructure/tailscale/operator-oauth.sops.yaml` through SOPS and replace
+both placeholders with a Tailscale OAuth client ID and secret. Create that
+client with write access limited to `General/Services`, `Devices/Core`, and
+`Keys/Auth Keys`, scoped to `tag:k8s-operator`.
+
+The tailnet policy must define `tag:k8s-operator` and
+`tag:sisyphus-exit`, let the operator own the Connector tag, auto-approve the
+exit-node tag, and grant only the intended travel user or group access to
+`autogroup:internet`. Do not grant that user access to `tag:sisyphus-exit`.
+For example, merge the following into the existing tailnet policy, replacing
+`group:travel@example.com` with the actual restricted group:
+
+```jsonc
+{
+  "tagOwners": {
+    "tag:k8s-operator": [],
+    "tag:sisyphus-exit": ["tag:k8s-operator"],
+  },
+  "autoApprovers": {
+    "exitNode": ["tag:sisyphus-exit"],
+  },
+  "grants": [
+    {
+      "src": ["group:travel@example.com"],
+      "dst": ["autogroup:internet"],
+      "ip": ["*"],
+    },
+  ],
+}
+```
+
+After reconciliation, verify `kubectl -n tailscale get connector sisyphus-exit`
+reports `ConnectorReady` and an exit node. Then select `sisyphus-exit` in the
+Tailscale client on each travel device and verify its public IP has changed to
+the Netcup server address. Selecting an exit node is explicit per client;
+normal node and workload egress remains direct.
+
 ## Observability
 
 The `observability` Flux Kustomization depends on storage and Cilium and
