@@ -127,10 +127,11 @@ Cloudflare Access policy in addition to its generated administrator password.
 ## Tailscale travel exit node
 
 The `tailscale` Flux Kustomization installs the official Tailscale Kubernetes
-Operator and one `sisyphus-exit` Connector. The Connector is a single pod that
-advertises itself as an exit node: a travel device explicitly selecting it
-sends internet-bound traffic through the cluster and exits through the
-server's Netcup public address.
+Operator. Once its CustomResourceDefinitions are ready, the dependent
+`tailscale-exit-node` Kustomization creates one `sisyphus-exit` Connector. The
+Connector is a single pod that advertises itself as an exit node: a travel
+device explicitly selecting it sends internet-bound traffic through the
+cluster and exits through the server's Netcup public address.
 
 Talos itself does not run Tailscale and its own traffic is unaffected. The
 Connector intentionally has no subnet routes, Tailscale Ingress, Funnel,
