@@ -7,8 +7,8 @@ type: Opaque
 stringData:
     #ENC[AES256_GCM,data:L9n/P/AgxRjpet4YhOWoC9Fa8jwSfFA6TtCLksw6b+4ZIMWBSNM0Wjv85F7mwr84wNT9IbUxGjIrx9NsGa+2TT+MUnewRTSKVoAi08MWCvxoAAFe,iv:AyRU4cLwwIAiPkBqHkyXEnTLRB6rmqnzSvJAY7EtNe4=,tag:IO1GxXKnVV+I8LHmlhRbqg==,type:comment]
     #ENC[AES256_GCM,data:7d66E4kXq9wt6GntKWqArT+5Ik7apSc2vsC81ml3QlB9j2IsDFH2m01Ye9OXymRgnp+K2iJFHJbCsq5oZmJjrfJWgMrjHYaAMFlC1GNjeqhM,iv:cibAtB/DFm4XYM+H/zT/dbIilmqIZ2RcqQ/ENnJtO9g=,tag:zugc+GM+tunxgy8Z3C67zQ==,type:comment]
-    client_id: ENC[AES256_GCM,data:3gvAVd80emBAMIqxsZACV8M=,iv:fT98WBfxWO0p1cjsk8pluFjBLHm1qDfSc9Wbs83Li2Q=,tag:IT0OueEBs+ZM2jrfz/w2mw==,type:str]
-    client_secret: ENC[AES256_GCM,data:2aXqAMu0VTXEGv+DST4OYSUBuwB7ONPyXLgL9DD1pdNGdh7iZv0DUEE4wOvSSqp0Wg8l6ZVwz2oAa0Gjd77/Dg==,iv:YSJ2iML2gp435GCagqvdwy8m7WWXQXw1xyMZ32nINmY=,tag:x/fsvIGySfzPXGYazOJxfg==,type:str]
+    client_id: ENC[AES256_GCM,data:Sv7bSNoiBpAk2cfDR23OkgM=,iv:qeP5Rk5zGRXLBuafJUPOVyqmMjDuM1+81mBY2t0p03Q=,tag:t2PkIId6nKhuAC+C85MZWA==,type:str]
+    client_secret: ENC[AES256_GCM,data:PZin3lknGz4KlmM5J7QQ3U1iDjWgEIBCDWZZ4S/byOCwHojTHa21vxLpvz9rmgBmmzNnlrtUbolz137F328E,iv:KXRoyuviGUUWqg+DXISMFiur8Vxc2qsbLqah0PZD6UQ=,tag:A+y+Px8oSFw+n7plCfmmMA==,type:str]
 sops:
     age:
         - enc: |
@@ -30,6 +30,6 @@ sops:
             -----END AGE ENCRYPTED FILE-----
           recipient: age1z9y7aurkjwxu75dckqnt27f0kds4tecf9m9ctpptg43e9un7vp6qpf8ext
     encrypted_regex: ^(data|stringData)$
-    lastmodified: "2026-09-07T20:20:22Z"
-    mac: ENC[AES256_GCM,data:vEtU68jbgI/NJFhsrzS8BgegpBbSnUw8GNTSYa5rsCaprWWLZc4X5BTpNWU6PbxNoiLIr7ZoIb+atuLKnWfb+nQzDH0hff62x8avNWLNBxlvePDUPaczhQzWRDlvbnOivhwhKN6khwRECaEQK0Vowz2sBvg+aqJrJPmuL0ULNgg=,iv:rdCJlTEk9H0X5YYSUyY+9uZrfVy4NbKC5IGBM52txrI=,tag:PayJhvCreO4tpJAUnXBGHA==,type:str]
+    lastmodified: "2026-09-07T20:34:30Z"
+    mac: ENC[AES256_GCM,data:GGltcJFXV6S9kUojeSffLgcC9Mv60fFTYhBSUp1vt71/IiP83SIeNrpMKXbBRTW++Iuy4MbbPDDzLZjUQTrFe/yh0eS9lIe+9J5f5cWRFoiyFcEssXuQcXsLPU6i3lR+7F9GKcoeEcxQdtkd0GvPSqSobxBi5yv+tRCf2u00upM=,iv:N5+EGI9iHJ2bIN4ZIBw53JtE6YreST8pq0GlHi4nb4I=,tag:S48DayDhOexzkny9Tsr7fg==,type:str]
     version: 3.13.0
