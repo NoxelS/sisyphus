@@ -158,14 +158,23 @@ SOPS_EDITOR="$EDITOR" sops infrastructure/litellm/litellm-runtime.sops.yaml
 ```
 
 Replace only `SMTP_PASSWORD: REPLACE_WITH_PROTON_SMTP_TOKEN` with the Proton
-SMTP token for `ai@noel.fyi`. Keep `LITELLM_SALT_KEY` stable: changing it makes
-existing hashed credentials unusable. The local administrator username is
-`admin`; obtain its generated password through the same trusted SOPS workflow
-and do not use the master key as an everyday client credential. Invite users
-with the least-privileged suitable LiteLLM role and issue virtual keys with
-explicit model access, budgets, and rate limits once models exist. Invitation
-and key-notification emails do not include API key material; users retrieve
-keys from the authenticated UI.
+SMTP token for `ai@noel.fyi`, commit, push, and wait for Flux to apply the
+Secret. Because an external Secret update does not alter the Helm-rendered pod
+template, perform a controlled restart and wait for it to finish:
+
+```sh
+kubectl rollout restart deployment/litellm -n litellm
+kubectl rollout status deployment/litellm -n litellm
+```
+
+Keep `LITELLM_SALT_KEY` stable: changing it makes existing hashed credentials
+unusable. The local administrator username is `admin`; obtain its generated
+password through the same trusted SOPS workflow and do not use the master key
+as an everyday client credential. Invite users with the least-privileged
+suitable LiteLLM role and issue virtual keys with explicit model access,
+budgets, and rate limits once models exist. Invitation and key-notification
+emails do not include API key material; users retrieve keys from the
+authenticated UI.
 
 ## Tailscale travel exit node
 
