@@ -151,10 +151,11 @@ agentic requests while keeping the facility ready for suitable workloads.
 The transcription backend uses the stable Speaches CPU image, which provides
 an OpenAI-compatible API backed by Faster Whisper. It loads
 `Systran/faster-whisper-small` with INT8 compute, four CPU threads, and one
-worker. Its Hugging Face cache uses a retained 10 GiB `local-path` PVC, so the
-first request downloads the model and later pod restarts reuse it. The model
-cache is node-local, not replicated, and safe to recreate by downloading the
-model again. The backend API key is generated in the SOPS-encrypted
+worker. Its Hugging Face cache uses a retained 10 GiB `local-path` PVC. An
+authenticated post-start hook downloads the model before the pod becomes
+ready, and later pod restarts reuse it. The model cache is node-local, not
+replicated, and safe to recreate by downloading the model again. The backend
+API key is generated in the SOPS-encrypted
 `faster-whisper-runtime` Secret and is shared only with the LiteLLM pod.
 
 Clients call the public LiteLLM endpoint with a master or virtual key rather

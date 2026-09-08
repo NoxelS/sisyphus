@@ -61,6 +61,20 @@ spec:
             - name: http
               containerPort: 8000
               protocol: TCP
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - sh
+                  - -ec
+                  - >-
+                    until curl --fail --silent --output /dev/null
+                    --header "Authorization: Bearer ${API_KEY}"
+                    http://127.0.0.1:8000/health; do sleep 1; done;
+                    curl --fail --silent --show-error --max-time 900
+                    --request POST
+                    --header "Authorization: Bearer ${API_KEY}"
+                    http://127.0.0.1:8000/v1/models/Systran/faster-whisper-small
           startupProbe:
             exec:
               command:
