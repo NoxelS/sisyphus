@@ -96,10 +96,11 @@ Do not publish Hubble Relay through Cloudflare, a NodePort, or a load balancer.
 The cluster currently uses Rancher's local-path provisioner v0.0.36. Its
 `local-path` StorageClass writes to `/var/mnt/local-path` on this node, is not
 the default class, and has `Retain` reclaim policy. Kite PostgreSQL requests a
-2 GiB `ReadWriteOnce` volume and LiteLLM PostgreSQL requests a 5 GiB
-`ReadWriteOnce` volume through that class. This is node-local storage: it is
-neither replicated nor a backup. Preserve the PVCs and copy data to an
-off-node backup target before replacing or reinstalling the node.
+2 GiB `ReadWriteOnce` volume, LiteLLM PostgreSQL requests 5 GiB, and Faster
+Whisper requests a 10 GiB model-cache volume through that class. This is
+node-local storage: it is neither replicated nor a backup. Preserve the
+database PVCs and copy their data to an off-node backup target before replacing
+or reinstalling the node; the model cache can be downloaded again.
 
 Longhorn remains intentionally undeployed. Before introducing it, decide the
 dedicated data disk, Talos mount/UserVolumeConfig, replica count appropriate
@@ -134,11 +135,10 @@ scope it so it does not unintentionally block authenticated API clients.
 ## LiteLLM proxy
 
 The `litellm` Flux Kustomization waits for storage and Cilium. It installs one
-LiteLLM proxy worker, a standalone PostgreSQL database, and standalone Redis.
-The proxy is intentionally configured with an empty `model_list`; it can start,
-serve the administrator UI, invite users, and manage virtual keys before a
-model provider is added. Models remain Git-owned in the HelmRelease rather than
-being stored dynamically in PostgreSQL.
+LiteLLM proxy worker, a standalone PostgreSQL database, standalone Redis, and a
+CPU-only Faster Whisper server. The Git-owned `whisper-1` model routes
+`/v1/audio/transcriptions` requests to the internal Faster Whisper service;
+models are not stored dynamically in PostgreSQL.
 
 PostgreSQL persists LiteLLM users, keys, budgets, and spend records on a 5 GiB
 `local-path` volume. Redis is password-protected but intentionally ephemeral:
@@ -147,6 +147,25 @@ be rebuilt after a pod or node restart. Response caching has a ten-minute TTL
 and `default_off` mode, so a caller must explicitly send
 `"cache": {"use-cache": true}`. This avoids silently caching sensitive or
 agentic requests while keeping the facility ready for suitable workloads.
+
+The transcription backend uses the stable Speaches CPU image, which provides
+an OpenAI-compatible API backed by Faster Whisper. It loads
+`Systran/faster-whisper-small` with INT8 compute, four CPU threads, and one
+worker. Its Hugging Face cache uses a retained 10 GiB `local-path` PVC, so the
+first request downloads the model and later pod restarts reuse it. The model
+cache is node-local, not replicated, and safe to recreate by downloading the
+model again. The backend API key is generated in the SOPS-encrypted
+`faster-whisper-runtime` Secret and is shared only with the LiteLLM pod.
+
+Clients call the public LiteLLM endpoint with a master or virtual key rather
+than reaching Faster Whisper directly:
+
+```sh
+curl https://ai.noel.fyi/v1/audio/transcriptions \
+  -H "Authorization: Bearer $LITELLM_API_KEY" \
+  -F model=whisper-1 \
+  -F file=@audio.mp3
+```
 
 The SOPS-encrypted `litellm-runtime` Secret contains a generated master key,
 stable salt, generated administrator password, and an SMTP password
@@ -282,11 +301,12 @@ or Talos ingress-firewall configuration. Workload-specific policies protect
 LiteLLM, its PostgreSQL and Redis services, monitoring, and portfolio staging;
 other workloads are not implicitly restricted. The LiteLLM proxy accepts
 traffic from `cloudflared` and Prometheus on port 4000, reaches
-only cluster DNS, its database and cache, and Proton SMTP, and has no model
-provider egress until a provider is added. The Netcup/provider firewall remains
-the public origin boundary. Keep public HTTP/HTTPS, NodePorts, and
-cluster-internal ports blocked; allow only restricted administration and
-stateful return traffic.
+only cluster DNS, its database and cache, Proton SMTP, and the cluster-internal
+Faster Whisper service. Faster Whisper accepts only LiteLLM and host
+health-check traffic and can reach Hugging Face over HTTPS to populate its
+model cache. The Netcup/provider firewall remains the public origin boundary.
+Keep public HTTP/HTTPS, NodePorts, and cluster-internal ports blocked; allow
+only restricted administration and stateful return traffic.
 
 ## Secrets
 

@@ -53,6 +53,7 @@ spec:
       runAsUser: 1000
     environmentSecrets:
       - litellm-runtime
+      - faster-whisper-runtime
       - redis-credentials
     service:
       type: ClusterIP
@@ -62,7 +63,14 @@ spec:
     masterkeySecretName: litellm-runtime
     masterkeySecretKey: masterkey
     proxy_config:
-      model_list: []
+      model_list:
+        - model_name: whisper-1
+          litellm_params:
+            model: openai/Systran/faster-whisper-small
+            api_base: http://faster-whisper:8000/v1
+            api_key: os.environ/API_KEY
+          model_info:
+            mode: audio_transcription
       general_settings:
         master_key: os.environ/PROXY_MASTER_KEY
         store_model_in_db: false

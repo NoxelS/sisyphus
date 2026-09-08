@@ -63,6 +63,15 @@ spec:
         - ports:
             - port: "6379"
               protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: litellm
+            k8s:app.kubernetes.io/name: faster-whisper
+            k8s:app.kubernetes.io/instance: faster-whisper
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
     - toFQDNs:
         - matchName: smtp.protonmail.ch
       toPorts:
@@ -125,3 +134,53 @@ spec:
             - port: "6379"
               protocol: TCP
   egress: []
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: faster-whisper
+  namespace: litellm
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: faster-whisper
+      app.kubernetes.io/instance: faster-whisper
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: litellm
+            k8s:app.kubernetes.io/name: litellm
+            k8s:app.kubernetes.io/instance: litellm
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toFQDNs:
+        - matchName: huggingface.co
+        - matchPattern: "*.huggingface.co"
+        - matchPattern: "*.hf.co"
+        - matchPattern: "*.xethub.hf.co"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

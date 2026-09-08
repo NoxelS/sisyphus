@@ -5,8 +5,8 @@ Single-node Talos/Kubernetes infrastructure managed with Flux.
 The current cluster runs Flux-managed Cilium with Hubble Relay, Cloudflare
 Tunnel, a Tailscale exit-node Connector, Kite, standalone PostgreSQL,
 LiteLLM with dedicated PostgreSQL and Redis, Prometheus, Alertmanager,
-Grafana, Loki, Grafana Alloy, and node-local persistent storage through
-Rancher local-path.
+Grafana, Loki, Grafana Alloy, a CPU-only Faster Whisper transcription service,
+and node-local persistent storage through Rancher local-path.
 It is not highly available and local-path volumes are not replicated or
 backed up automatically.
 
