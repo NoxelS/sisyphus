@@ -23,15 +23,13 @@ spec:
             k8s:app.kubernetes.io/name: prometheus
       toPorts:
         - ports:
-            - port: "4001"
+            - port: "4000"
               protocol: TCP
     - fromEntities:
         - host
       toPorts:
         - ports:
             - port: "4000"
-              protocol: TCP
-            - port: "4001"
               protocol: TCP
   egress:
     - toEndpoints:

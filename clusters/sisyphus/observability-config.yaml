@@ -11,6 +11,7 @@ spec:
   timeout: 10m
   dependsOn:
     - name: observability
+    - name: litellm
   sourceRef:
     kind: GitRepository
     name: flux-system

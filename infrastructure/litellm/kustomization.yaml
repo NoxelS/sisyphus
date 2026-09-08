@@ -11,5 +11,4 @@ resources:
   - postgresql-helmrelease.yaml
   - redis-helmrelease.yaml
   - helmrelease.yaml
-  - metrics-service.yaml
   - network-policy.yaml

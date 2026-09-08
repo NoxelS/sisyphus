@@ -127,10 +127,9 @@ Cloudflare Access policy in addition to its generated administrator password.
 
 The dashboard-managed tunnel should map `ai.noel.fyi` to
 `http://litellm.litellm.svc.cluster.local:4000`. Only the proxy port belongs on
-that route; the separate metrics port must remain cluster-internal. LiteLLM
-authenticates API traffic with its master or virtual keys. If Cloudflare Access
-is added for the administrator UI, scope it so it does not unintentionally
-block authenticated API clients.
+that route. LiteLLM authenticates API traffic, including `/metrics`, with its
+master or virtual keys. If Cloudflare Access is added for the administrator UI,
+scope it so it does not unintentionally block authenticated API clients.
 
 ## LiteLLM proxy
 
@@ -249,9 +248,9 @@ The `observability-config` Kustomization waits for `observability` so the
 Prometheus Operator CRDs exist before ServiceMonitors, PodMonitors, and
 PrometheusRules are applied. It also provisions the Loki data source, the
 Sisyphus overview dashboard, initial platform alerts, a cluster-internal
-LiteLLM metrics scrape, and the monitoring namespace Cilium policy. LiteLLM's
-unauthenticated metrics process listens separately on port 4001 and is not
-exposed by the Cloudflare route.
+LiteLLM metrics scrape, and the monitoring namespace Cilium policy. The
+ServiceMonitor runs in the `litellm` namespace, reads the master key from the
+local SOPS-managed Secret, and uses it to authenticate `/metrics` scrapes.
 
 Persistent observability data uses explicit `local-path` volumes:
 
@@ -282,7 +281,7 @@ replacement is disabled. There is no cluster-wide default-deny Cilium policy
 or Talos ingress-firewall configuration. Workload-specific policies protect
 LiteLLM, its PostgreSQL and Redis services, monitoring, and portfolio staging;
 other workloads are not implicitly restricted. The LiteLLM proxy accepts
-traffic from `cloudflared` on port 4000 and Prometheus on port 4001, reaches
+traffic from `cloudflared` and Prometheus on port 4000, reaches
 only cluster DNS, its database and cache, and Proton SMTP, and has no model
 provider egress until a provider is added. The Netcup/provider firewall remains
 the public origin boundary. Keep public HTTP/HTTPS, NodePorts, and

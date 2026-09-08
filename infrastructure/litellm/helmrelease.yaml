@@ -143,13 +143,6 @@ spec:
           enabled: false
         helm:
           enabled: true
-    args:
-      - --config
-      - /etc/litellm/config.yaml
-      - --num_workers
-      - "1"
-      - --prometheus_metrics_port
-      - "4001"
     logLevel: INFO
     envVars:
       LITELLM_MODE: PRODUCTION
