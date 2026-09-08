@@ -1,0 +1,50 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: redis
+  namespace: litellm
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: redis
+    namespace: litellm
+  install:
+    createNamespace: false
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    fullnameOverride: redis
+    architecture: standalone
+    image:
+      registry: registry-1.docker.io
+      repository: bitnami/redis
+      # This chart publishes `latest`; digest is the immutable source of truth.
+      tag: latest
+      digest: sha256:ffa455a3ad00bccc24dfde113ef55329dde687da242e9feb6ccd2b30eb93e8f3
+    auth:
+      enabled: true
+      existingSecret: redis-credentials
+      existingSecretPasswordKey: REDIS_PASSWORD
+      usePasswordFiles: true
+    commonConfiguration: |-
+      appendonly no
+      save ""
+      maxmemory 192mb
+      maxmemory-policy volatile-lru
+    networkPolicy:
+      enabled: false
+    master:
+      persistence:
+        enabled: false
+        sizeLimit: 512Mi
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          cpu: 250m
+          memory: 256Mi

@@ -95,9 +95,10 @@ Do not publish Hubble Relay through Cloudflare, a NodePort, or a load balancer.
 
 The cluster currently uses Rancher's local-path provisioner v0.0.36. Its
 `local-path` StorageClass writes to `/var/mnt/local-path` on this node, is not
-the default class, and has `Retain` reclaim policy. PostgreSQL requests one
-2 GiB `ReadWriteOnce` volume through that class. This is node-local storage:
-it is neither replicated nor a backup. Preserve the PVC and copy data to an
+the default class, and has `Retain` reclaim policy. Kite PostgreSQL requests a
+2 GiB `ReadWriteOnce` volume and LiteLLM PostgreSQL requests a 5 GiB
+`ReadWriteOnce` volume through that class. This is node-local storage: it is
+neither replicated nor a backup. Preserve the PVCs and copy data to an
 off-node backup target before replacing or reinstalling the node.
 
 Longhorn remains intentionally undeployed. Before introducing it, decide the
@@ -110,7 +111,7 @@ The `cloudflare-tunnel` Flux Kustomization deploys two `cloudflared` replicas
 using a SOPS-encrypted tunnel token. The public hostname and service mapping
 are configured in the Cloudflare dashboard. The tunnel connects outbound to
 the cluster; no NodePort, LoadBalancer, Kubernetes Ingress, Gateway, Traefik,
-or Caddy is required for Kite.
+or Caddy is required for Kite or LiteLLM.
 
 The `kite` Flux Kustomization waits for the storage Kustomization. Kite runs
 one replica with anonymous users disabled, uses the standalone PostgreSQL
@@ -123,6 +124,48 @@ in-cluster service `http://grafana.monitoring.svc.cluster.local:80`. Grafana is
 the only observability UI intended for public routing. Prometheus, Alertmanager,
 Loki, Alloy, and Hubble Relay remain cluster-internal. Protect Grafana with a
 Cloudflare Access policy in addition to its generated administrator password.
+
+The dashboard-managed tunnel should map `ai.noel.fyi` to
+`http://litellm.litellm.svc.cluster.local:4000`. Only the proxy port belongs on
+that route; the separate metrics port must remain cluster-internal. LiteLLM
+authenticates API traffic with its master or virtual keys. If Cloudflare Access
+is added for the administrator UI, scope it so it does not unintentionally
+block authenticated API clients.
+
+## LiteLLM proxy
+
+The `litellm` Flux Kustomization waits for storage and Cilium. It installs one
+LiteLLM proxy worker, a standalone PostgreSQL database, and standalone Redis.
+The proxy is intentionally configured with an empty `model_list`; it can start,
+serve the administrator UI, invite users, and manage virtual keys before a
+model provider is added. Models remain Git-owned in the HelmRelease rather than
+being stored dynamically in PostgreSQL.
+
+PostgreSQL persists LiteLLM users, keys, budgets, and spend records on a 5 GiB
+`local-path` volume. Redis is password-protected but intentionally ephemeral:
+it backs shared virtual-key authentication and opt-in response caching, and can
+be rebuilt after a pod or node restart. Response caching has a ten-minute TTL
+and `default_off` mode, so a caller must explicitly send
+`"cache": {"use-cache": true}`. This avoids silently caching sensitive or
+agentic requests while keeping the facility ready for suitable workloads.
+
+The SOPS-encrypted `litellm-runtime` Secret contains a generated master key,
+stable salt, generated administrator password, and an SMTP password
+placeholder. Before sending invitations, edit it from a trusted workstation:
+
+```sh
+SOPS_EDITOR="$EDITOR" sops infrastructure/litellm/litellm-runtime.sops.yaml
+```
+
+Replace only `SMTP_PASSWORD: REPLACE_WITH_PROTON_SMTP_TOKEN` with the Proton
+SMTP token for `ai@noel.fyi`. Keep `LITELLM_SALT_KEY` stable: changing it makes
+existing hashed credentials unusable. The local administrator username is
+`admin`; obtain its generated password through the same trusted SOPS workflow
+and do not use the master key as an everyday client credential. Invite users
+with the least-privileged suitable LiteLLM role and issue virtual keys with
+explicit model access, budgets, and rate limits once models exist. Invitation
+and key-notification emails do not include API key material; users retrieve
+keys from the authenticated UI.
 
 ## Tailscale travel exit node
 
@@ -196,8 +239,10 @@ component targets remain enabled.
 The `observability-config` Kustomization waits for `observability` so the
 Prometheus Operator CRDs exist before ServiceMonitors, PodMonitors, and
 PrometheusRules are applied. It also provisions the Loki data source, the
-Sisyphus overview dashboard, initial platform alerts, and the monitoring
-namespace Cilium policy.
+Sisyphus overview dashboard, initial platform alerts, a cluster-internal
+LiteLLM metrics scrape, and the monitoring namespace Cilium policy. LiteLLM's
+unauthenticated metrics process listens separately on port 4001 and is not
+exposed by the Cloudflare route.
 
 Persistent observability data uses explicit `local-path` volumes:
 
@@ -224,12 +269,16 @@ restart. Never put the decoded value into Helm values or documentation.
 ## Network policy and firewall boundary
 
 Cilium is the active CNI, but kube-proxy remains enabled and kube-proxy
-replacement is disabled. No repository-managed default-deny Cilium policy or
-Talos ingress-firewall configuration exists yet. The Netcup/provider firewall
-is therefore the current public boundary. Keep public HTTP/HTTPS, NodePorts,
-and cluster-internal ports blocked; allow only restricted administration and
-stateful return traffic. Add explicit Cilium policies for `cloudflared`, Kite,
-and PostgreSQL before claiming pod ingress or egress is restricted.
+replacement is disabled. There is no cluster-wide default-deny Cilium policy
+or Talos ingress-firewall configuration. Workload-specific policies protect
+LiteLLM, its PostgreSQL and Redis services, monitoring, and portfolio staging;
+other workloads are not implicitly restricted. The LiteLLM proxy accepts
+traffic from `cloudflared` on port 4000 and Prometheus on port 4001, reaches
+only cluster DNS, its database and cache, and Proton SMTP, and has no model
+provider egress until a provider is added. The Netcup/provider firewall remains
+the public origin boundary. Keep public HTTP/HTTPS, NodePorts, and
+cluster-internal ports blocked; allow only restricted administration and
+stateful return traffic.
 
 ## Secrets
 
@@ -247,7 +296,8 @@ Remaining work includes:
 
 1. application-specific network policies informed by Hubble observations;
 2. an external Alertmanager notification receiver;
-3. off-node etcd, PostgreSQL, metrics, and log recovery arrangements;
+3. off-node etcd, Kite and LiteLLM PostgreSQL, metrics, and log recovery
+   arrangements;
 4. Longhorn with a dedicated data volume, replica policy, and off-cluster
    backups.
 

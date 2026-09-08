@@ -8,5 +8,6 @@ resources:
   - flux-notifications.yaml
   - monitors/platform-podmonitors.yaml
   - monitors/cilium-servicemonitors.yaml
+  - monitors/litellm-servicemonitor.yaml
   - network-policy.yaml
   - smtp-network-policy.yaml

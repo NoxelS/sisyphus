@@ -87,3 +87,33 @@ spec:
             severity: warning
           annotations:
             summary: Hubble Relay is unavailable
+        - alert: LiteLLMUnavailable
+          expr: |-
+            kube_deployment_status_replicas_available{
+              namespace="litellm",deployment="litellm"
+            } < 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: LiteLLM proxy is unavailable
+        - alert: LiteLLMPostgreSQLUnavailable
+          expr: |-
+            kube_statefulset_status_replicas_ready{
+              namespace="litellm",statefulset="postgresql"
+            } < 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: LiteLLM PostgreSQL is unavailable
+        - alert: LiteLLMRedisUnavailable
+          expr: |-
+            kube_statefulset_status_replicas_ready{
+              namespace="litellm",statefulset="redis-master"
+            } < 1
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: LiteLLM Redis cache is unavailable

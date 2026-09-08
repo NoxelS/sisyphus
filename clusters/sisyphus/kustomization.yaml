@@ -10,4 +10,5 @@ resources:
   - observability.yaml
   - observability-config.yaml
   - kite.yaml
+  - litellm.yaml
   - portfolio-staging.yaml
