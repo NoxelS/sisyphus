@@ -33,6 +33,52 @@ spec:
         fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
+      initContainers:
+        - name: preload-model
+          image: ghcr.io/speaches-ai/speaches:0.8.3-cpu@sha256:21e3df06d842fb7802ab470dd77c25f0e8c0d22950e8d8c6ae886e851af53ef8
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -ec
+            - >-
+              uvicorn --factory speaches.main:create_app &
+              preload_server_pid=$!;
+              trap 'kill "$preload_server_pid" 2>/dev/null || true' EXIT;
+              until curl --fail --silent --output /dev/null
+              --header "Authorization: Bearer ${API_KEY}"
+              http://127.0.0.1:8000/health; do sleep 1; done;
+              curl --fail --silent --show-error --max-time 900
+              --request POST
+              --header "Authorization: Bearer ${API_KEY}"
+              http://127.0.0.1:8000/v1/models/Systran/faster-whisper-small
+          env:
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: faster-whisper-runtime
+                  key: API_KEY
+            - name: ENABLE_UI
+              value: "false"
+            - name: LOG_LEVEL
+              value: info
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          volumeMounts:
+            - name: model-cache
+              mountPath: /home/ubuntu/.cache/huggingface
+            - name: tmp
+              mountPath: /tmp
       containers:
         - name: faster-whisper
           image: ghcr.io/speaches-ai/speaches:0.8.3-cpu@sha256:21e3df06d842fb7802ab470dd77c25f0e8c0d22950e8d8c6ae886e851af53ef8
@@ -61,20 +107,6 @@ spec:
             - name: http
               containerPort: 8000
               protocol: TCP
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                  - sh
-                  - -ec
-                  - >-
-                    until curl --fail --silent --output /dev/null
-                    --header "Authorization: Bearer ${API_KEY}"
-                    http://127.0.0.1:8000/health; do sleep 1; done;
-                    curl --fail --silent --show-error --max-time 900
-                    --request POST
-                    --header "Authorization: Bearer ${API_KEY}"
-                    http://127.0.0.1:8000/v1/models/Systran/faster-whisper-small
           startupProbe:
             exec:
               command:
