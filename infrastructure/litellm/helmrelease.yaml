@@ -30,6 +30,8 @@ spec:
     serviceAccount:
       create: true
       automount: false
+    podAnnotations:
+      secrets.sisyphus.noel.fyi/faster-whisper-revision: "1"
     strategy:
       type: RollingUpdate
       rollingUpdate:

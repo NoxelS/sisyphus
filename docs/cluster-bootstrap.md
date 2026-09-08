@@ -157,6 +157,8 @@ server starts, and later pod restarts reuse it. The model cache is node-local, n
 replicated, and safe to recreate by downloading the model again. The backend
 API key is generated in the SOPS-encrypted
 `faster-whisper-runtime` Secret and is shared only with the LiteLLM pod.
+When rotating it, increment the Faster Whisper credential-revision pod
+annotation in the LiteLLM HelmRelease so the proxy reloads the Secret value.
 
 Clients call the public LiteLLM endpoint with a master or virtual key rather
 than reaching Faster Whisper directly:
