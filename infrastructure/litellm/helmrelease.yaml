@@ -133,11 +133,11 @@ spec:
       ttlSecondsAfterFinished: 300
       resources:
         requests:
-          cpu: 200m
-          memory: 512Mi
+          cpu: "1"
+          memory: 2Gi
         limits:
           cpu: "1"
-          memory: 1Gi
+          memory: 4Gi
       hooks:
         argocd:
           enabled: false
