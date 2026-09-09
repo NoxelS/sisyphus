@@ -1,4 +1,6 @@
 apiVersion: v1
+stringData:
+    SOLHEIM_API_KEY: ENC[AES256_GCM,data:wDeFs17ceeOEY9eHq2tV9NfQPRtS4+g5G+oFBwkfZoNL5UGKgjGFoWo=,iv:y4ftAjWGp5m3NvJcoAeVVvNepdkuxcDNxbnDDfiosOI=,tag:16jQK9g9fiK+X1e9s85dNA==,type:str]
 data:
     LITELLM_SALT_KEY: ENC[AES256_GCM,data:wiwnLFYQufydmP2POWe/oXTOTEtlC/dLsrM/1vq6LcTdtHg0s29ihP1VqvDeEQ0Q/yMHbo3qMGTy8fFBj6MySpVFffMgar0DSotOxoMpVQelecw/34vrMfWtYSw=,iv:jQtNvEL8HNDmXQs3qXeAtgsVZnYbTSYH9XYpZapvO0U=,tag:0zYl9dBEK3czUGfIjl/7Xw==,type:str]
     SMTP_PASSWORD: ENC[AES256_GCM,data:xvvbMbhyAzOCzdoAxLoHcQ==,iv:dVV3pd5gSd0j7oBPAqcezEqsO0i1oGZ01xeysy1m24I=,tag:rD8neJPJeHlZ+E81h++L+Q==,type:str]
@@ -29,6 +31,6 @@ sops:
             -----END AGE ENCRYPTED FILE-----
           recipient: age1z9y7aurkjwxu75dckqnt27f0kds4tecf9m9ctpptg43e9un7vp6qpf8ext
     encrypted_regex: ^(data|stringData)$
-    lastmodified: "2026-09-08T14:16:43Z"
-    mac: ENC[AES256_GCM,data:q7HnD4HP5bgqtTDfUqgcrg8hz3UE8+WgovGa2/9BLNy3q4fAHRjjwKqebvG1WkgyS/nuCdFMeGRvkarP8okgbDtrD+ZYH82KWdep12Z7fksOmIcE0d8eGABihydHWzlliBxgs52PD8osXEyzhzDRCYBlVeghp3zxoHAmsjw2e3w=,iv:CPEY1iZ4e/laVufJCU52P7GWhSO5oakMliSb5gN+iaw=,tag:wtOo3KZqjM/geUtnLFfz4A==,type:str]
+    lastmodified: "2026-09-09T14:55:49Z"
+    mac: ENC[AES256_GCM,data:IDubOFceC1TjTPbfjKNC0/OmGwCKg8vGC1D9fvnO5SB8gkREA8Y5wbkekdnQ9MTQJ1KtWdO9nIbu90t+TnzeDQauQfeLg7atRzORVVL7nbwkQTptAoa1G7beVpIZWAuz0zU1hWy5qdWZkregMiIX1eiYyQxVOMEyQzcIyZfLg3A=,iv:BaGaUVnOe0CT32H5mJS/ngCpzUiYGsQqqC+FvQD64eY=,tag:uZyDpIx356onKtxMBXUAOw==,type:str]
     version: 3.13.0

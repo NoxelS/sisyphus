@@ -137,8 +137,14 @@ scope it so it does not unintentionally block authenticated API clients.
 The `litellm` Flux Kustomization waits for storage and Cilium. It installs one
 LiteLLM proxy worker, a standalone PostgreSQL database, standalone Redis, and a
 CPU-only Faster Whisper server. The Git-owned `whisper-1` model routes
-`/v1/audio/transcriptions` requests to the internal Faster Whisper service;
-models are not stored dynamically in PostgreSQL.
+`/v1/audio/transcriptions` requests to the internal Faster Whisper service.
+The Git-owned `qwen3.6-35b-a3b` model routes OpenAI-compatible chat requests to
+Solheim over HTTPS and reads `SOLHEIM_API_KEY` from the `litellm-runtime`
+Secret. Its LiteLLM metadata advertises a 262,144-token context window and
+estimates spend at Qwen3.6-35B-A3B's global reference rate: $0.248 per million
+input tokens and $1.485 per million output tokens. This is a tracking estimate,
+not a statement of Solheim's subscription billing. Models are not stored
+dynamically in PostgreSQL.
 
 PostgreSQL persists LiteLLM users, keys, budgets, and spend records on a 5 GiB
 `local-path` volume. Redis is password-protected but intentionally ephemeral:
@@ -172,16 +178,22 @@ curl https://ai.noel.fyi/v1/audio/transcriptions \
 
 The SOPS-encrypted `litellm-runtime` Secret contains a generated master key,
 stable salt, generated administrator password, and an SMTP password
-placeholder. Before sending invitations, edit it from a trusted workstation:
+placeholder. It also supplies provider credentials referenced by the
+Git-owned model configuration. Before enabling the Solheim-backed
+`qwen3.6-35b-a3b` model or sending invitations, edit it from a trusted
+workstation:
 
 ```sh
 SOPS_EDITOR="$EDITOR" sops infrastructure/litellm/litellm-runtime.sops.yaml
 ```
 
-Replace only `SMTP_PASSWORD: REPLACE_WITH_PROTON_SMTP_TOKEN` with the Proton
-SMTP token for `ai@noel.fyi`, commit, push, and wait for Flux to apply the
-Secret. Because an external Secret update does not alter the Helm-rendered pod
-template, perform a controlled restart and wait for it to finish:
+Add a `stringData` mapping containing `SOLHEIM_API_KEY` with the plain Solheim
+API key; SOPS encrypts that mapping before it reaches Git. Replace only
+`SMTP_PASSWORD: REPLACE_WITH_PROTON_SMTP_TOKEN` with the Proton SMTP token for
+`ai@noel.fyi` when invitation email is needed. Commit, push, and wait for Flux
+to apply the Secret. Because an external Secret update does not alter the
+Helm-rendered pod template, perform a controlled restart and wait for it to
+finish:
 
 ```sh
 kubectl rollout restart deployment/litellm -n litellm

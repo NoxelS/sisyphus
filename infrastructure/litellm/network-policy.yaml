@@ -78,6 +78,12 @@ spec:
         - ports:
             - port: "587"
               protocol: TCP
+    - toFQDNs:
+        - matchName: api.solheim.ai
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
