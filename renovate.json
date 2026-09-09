@@ -20,7 +20,8 @@
   "ignorePaths": [
     "**/*.sops.yaml",
     "clusters/sisyphus/flux-system/gotk-components.yaml",
-    "infrastructure/portfolio-staging/deployment.yaml"
+    "infrastructure/portfolio-staging/deployment.yaml",
+    "infrastructure/portfolio-staging/image-automation.yaml"
   ],
   "dependencyDashboard": true,
   "prConcurrentLimit": 5,
