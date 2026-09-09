@@ -143,8 +143,10 @@ Solheim over HTTPS and reads `SOLHEIM_API_KEY` from the `litellm-runtime`
 Secret. Its LiteLLM metadata advertises a 262,144-token context window and
 estimates spend at Qwen3.6-35B-A3B's global reference rate: $0.248 per million
 input tokens and $1.485 per million output tokens. This is a tracking estimate,
-not a statement of Solheim's subscription billing. Models are not stored
-dynamically in PostgreSQL.
+not a statement of Solheim's subscription billing. LiteLLM stores model records
+in PostgreSQL and includes prompt and response content in new spend-log records
+so requests can be traced in the administrator UI. Treat these records and
+database backups as sensitive data.
 
 PostgreSQL persists LiteLLM users, keys, budgets, and spend records on a 5 GiB
 `local-path` volume. Redis is password-protected but intentionally ephemeral:
