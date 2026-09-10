@@ -78,8 +78,11 @@ spec:
         - ports:
             - port: "587"
               protocol: TCP
+    # LiteLLM retrieves its documentation RSS and model-pricing JSON at runtime.
     - toFQDNs:
         - matchName: api.solheim.ai
+        - matchName: docs.litellm.ai
+        - matchName: raw.githubusercontent.com
       toPorts:
         - ports:
             - port: "443"
