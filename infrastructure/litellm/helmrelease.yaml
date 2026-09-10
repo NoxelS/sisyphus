@@ -110,7 +110,7 @@ spec:
         request_timeout: 600
         set_verbose: false
         json_logs: true
-        turn_off_message_logging: true
+        turn_off_message_logging: false
         require_auth_for_metrics_endpoint: true
         key_generation_settings:
           team_key_generation:
