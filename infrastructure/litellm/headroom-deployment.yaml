@@ -32,7 +32,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: headroom
-          image: ghcr.io/headroomlabs-ai/headroom:slim-nonroot-7bd4dba@sha256:4d54867b434d0ca894247bd545b692b0ce513c585200a2302be3122fc16cbf27
+          image: ghcr.io/chopratejas/headroom:latest@sha256:50b85d8e320cfcdf1b38919bb7ae067b93ff7a8de0a93f05b2c1246370200d1c
           imagePullPolicy: IfNotPresent
           env:
             - name: HEADROOM_TELEMETRY
