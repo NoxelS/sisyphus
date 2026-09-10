@@ -72,6 +72,15 @@ spec:
         - ports:
             - port: "8000"
               protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: litellm
+            k8s:app.kubernetes.io/name: headroom
+            k8s:app.kubernetes.io/instance: headroom
+      toPorts:
+        - ports:
+            - port: "8787"
+              protocol: TCP
     - toFQDNs:
         - matchName: smtp.protonmail.ch
       toPorts:
@@ -87,6 +96,34 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: headroom
+  namespace: litellm
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: headroom
+      app.kubernetes.io/instance: headroom
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: litellm
+            k8s:app.kubernetes.io/name: litellm
+            k8s:app.kubernetes.io/instance: litellm
+      toPorts:
+        - ports:
+            - port: "8787"
+              protocol: TCP
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8787"
+              protocol: TCP
+  egress: []
 ---
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy

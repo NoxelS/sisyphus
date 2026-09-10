@@ -9,6 +9,8 @@ resources:
   - faster-whisper-pvc.yaml
   - faster-whisper-deployment.yaml
   - faster-whisper-service.yaml
+  - headroom-deployment.yaml
+  - headroom-service.yaml
   - litellm-ocirepository.yaml
   - postgresql-ocirepository.yaml
   - redis-ocirepository.yaml

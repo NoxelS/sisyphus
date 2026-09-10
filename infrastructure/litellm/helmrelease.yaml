@@ -92,6 +92,12 @@ spec:
         database_connection_pool_limit: 10
         disable_error_logs: true
         user_api_key_cache_ttl: 300
+      guardrails:
+        - guardrail_name: headroom-compression
+          litellm_params:
+            guardrail: headroom
+            mode: pre_call
+            api_base: http://headroom:8787
       litellm_settings:
         callbacks:
           - prometheus
