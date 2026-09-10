@@ -45,19 +45,19 @@ spec:
               protocol: TCP
           startupProbe:
             httpGet:
-              path: /readyz
+              path: /livez
               port: http
             periodSeconds: 5
             failureThreshold: 24
           readinessProbe:
             httpGet:
-              path: /readyz
+              path: /livez
               port: http
             periodSeconds: 10
             failureThreshold: 3
           livenessProbe:
             httpGet:
-              path: /readyz
+              path: /livez
               port: http
             periodSeconds: 30
             failureThreshold: 3
