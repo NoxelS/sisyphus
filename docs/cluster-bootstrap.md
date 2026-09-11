@@ -138,12 +138,10 @@ The `litellm` Flux Kustomization waits for storage and Cilium. It installs one
 LiteLLM proxy worker, a standalone PostgreSQL database, standalone Redis, and a
 CPU-only Faster Whisper server. The Git-owned `whisper-1` model routes
 `/v1/audio/transcriptions` requests to the internal Faster Whisper service.
-The Git-owned `qwen3.6-35b-a3b` model routes OpenAI-compatible chat requests to
+The Git-owned `qwen3.8-27b` model routes OpenAI-compatible chat requests to
 Solheim over HTTPS and reads `SOLHEIM_API_KEY` from the `litellm-runtime`
 Secret. Its LiteLLM metadata advertises a 262,144-token context window and
-estimates spend at Qwen3.6-35B-A3B's global reference rate: $0.248 per million
-input tokens and $1.485 per million output tokens. This is a tracking estimate,
-not a statement of Solheim's subscription billing. LiteLLM stores model records
+permits up to three concurrent upstream requests. LiteLLM stores model records
 in PostgreSQL and includes prompt and response content in new spend-log records
 so requests can be traced in the administrator UI. Treat these records and
 database backups as sensitive data.
@@ -182,7 +180,7 @@ The SOPS-encrypted `litellm-runtime` Secret contains a generated master key,
 stable salt, generated administrator password, and an SMTP password
 placeholder. It also supplies provider credentials referenced by the
 Git-owned model configuration. Before enabling the Solheim-backed
-`qwen3.6-35b-a3b` model or sending invitations, edit it from a trusted
+`qwen3.8-27b` model or sending invitations, edit it from a trusted
 workstation:
 
 ```sh
