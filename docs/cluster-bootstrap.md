@@ -142,6 +142,11 @@ The Git-owned `qwen3.8-27b` model routes OpenAI-compatible chat requests to
 Solheim over HTTPS and reads `SOLHEIM_API_KEY` from the `litellm-runtime`
 Secret. Its LiteLLM metadata advertises a 262,144-token context window and
 permits up to three concurrent upstream requests. LiteLLM stores model records
+and records estimated request spend using Alibaba Cloud Model Studio's
+international Qwen3.8-27B on-demand benchmark: $0.50 per million input tokens
+and $3.00 per million output tokens. This is a comparable metered rate, not a
+Solheim invoice: Solheim's Coder+ service is a flat €30/month plan with
+unlimited fair-use tokens.
 in PostgreSQL and includes prompt and response content in new spend-log records
 so requests can be traced in the administrator UI. Treat these records and
 database backups as sensitive data.
