@@ -12,3 +12,4 @@ data:
   MALG_LLM__MAX_RETRIES: "3"
   MALG_BROWSER__URL: http://lightpanda:9223/mcp
   MALG_SEARCH__URL: http://searxng:8080
+  MALG_AUTH__USERNAME: admin
