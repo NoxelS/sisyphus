@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: malg-runtime
+    namespace: malg
+type: Opaque
+stringData:
+    MALG_LLM__API_KEY: ENC[AES256_GCM,data:SN2tj36A+3sp7gC7631T9+NV7gmpQEAPyA==,iv:yVQzxA235K2flXMERAfzQTinosy7RZLFW5NyYocY/xc=,tag:rZcwaG1n3qkqKARmvPKHzg==,type:str]
+    SEARXNG_SECRET: ENC[AES256_GCM,data:FIPmf2VrvrwB1ijLTKb/FjPb5jLvKgUPqeNqk5cHX1DTChs0j481XsNGH4j4UrV/qTlDcs99AZjyZR3nwgdqAA==,iv:KeoTcnHQr/tDJqjoKNRAwCae3lfEoESHidNdrdf8TKk=,tag:+2TgbHXzWEDCpcxx5s+7BQ==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAvNHdxcitoSTA1T2tTR2xz
+            S2VINTVVbmZid2poR1QvMXNSTzJLSjdRYVVVClVwSHhYZEpBa3R0WDEvZ0doOFds
+            cmtPK1pOTklOWDNGRnVZM3dpbnVSUTgKLS0tIGFLbGwwR3oyL0NHL2JWTjNjbG4r
+            QnBUOVk0QzZQZU1pK3NlaUdwYlBCMmMKCraoCxYJlUrpCEA1kPMNZE3a6fGKIKvk
+            5m6kxzp5X5mnXoQxL4i8is9FEwC+IGK7dP97gTs7GF7G20N3hP749w==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age18rzcjdhhf4kdfnkjnj7uwmtt36lu5r3kzvdfpdeu78kau73ekqgsfh222y
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBJRzNVR1RaaFZ0OGdjTHRS
+            bVhYNGVZWCs4OXZPYmp0NHpnSlFVYW1vZlYwCmFHSytET2svMXpORVQvK0pOeFdU
+            bVNBZnEyN3UzYndsR1ZNby9EQktWeVEKLS0tIHBtY1dZSkxQY3l3Z3VVdUErS0Rk
+            UFFpY3Q4QWlHLzZHZjBjQVpub3FPM2MKpxVEvLwP+UrGcWirV7r2yTnaIRadJ/Rv
+            Ot5jkH5naufvk4WJ1zipI4u+2WJBD+SVzet+4HLKoU3lbSn0MIPiKQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1z9y7aurkjwxu75dckqnt27f0kds4tecf9m9ctpptg43e9un7vp6qpf8ext
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-09-12T21:42:00Z"
+    mac: ENC[AES256_GCM,data:EnYkwNQfppc9WeKgsZImOguOj34jalCjE0bCj8LcbdcmvHrSFRXUl/4SwCN+hB3o3ik8U8VWwA/Z8h+/Sl/bmXFpkWiB9lFRfukzeyQNEUr3hvtwVkbK/Xvu+NjD3cXpuOMoh/QZnjcPuS5zmzgfOH7/M/HC3nygvWavT8L6/fA=,iv:DYQ4xSLWAZ+NATIP6rp1Gl77XjgpjT9m4cLQ/23Wob0=,tag:ZL3whTLuGjYFM4rZ7TdY9A==,type:str]
+    version: 3.13.0

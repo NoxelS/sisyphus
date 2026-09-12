@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lightpanda
+  namespace: malg
+  labels:
+    app.kubernetes.io/name: lightpanda
+    app.kubernetes.io/instance: lightpanda
+    app.kubernetes.io/part-of: malg
+    app.kubernetes.io/component: browser
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lightpanda
+      app.kubernetes.io/instance: lightpanda
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: lightpanda
+        app.kubernetes.io/instance: lightpanda
+        app.kubernetes.io/part-of: malg
+        app.kubernetes.io/component: browser
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: lightpanda
+          image: lightpanda/browser:nightly
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/lightpanda", "mcp", "--host", "0.0.0.0", "--port", "9223"]
+          env:
+            - name: HOME
+              value: /tmp
+            - name: LIGHTPANDA_DISABLE_TELEMETRY
+              value: "true"
+            - name: LIGHTPANDA_DISABLE_CORE_DUMP
+              value: "true"
+            - name: TMPDIR
+              value: /tmp
+          ports:
+            - name: mcp
+              containerPort: 9223
+              protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi

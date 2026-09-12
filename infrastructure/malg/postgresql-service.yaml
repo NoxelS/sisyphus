@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql
+  namespace: malg
+  labels:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: postgresql
+    app.kubernetes.io/part-of: malg
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: postgresql
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+      protocol: TCP

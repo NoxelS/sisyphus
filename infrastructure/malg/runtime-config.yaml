@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: runtime-config
+  namespace: malg
+data:
+  MALG_LLM__MODEL: qwen3.8-27b
+  MALG_LLM__API_BASE: http://litellm.litellm.svc.cluster.local:4000/v1
+  MALG_LLM__CONTEXT_WINDOW: "262144"
+  MALG_LLM__MAX_TOKENS: "32768"
+  MALG_LLM__REQUEST_TIMEOUT_SECONDS: "600"
+  MALG_LLM__MAX_RETRIES: "3"
+  MALG_BROWSER__URL: http://lightpanda:9223/mcp
+  MALG_SEARCH__URL: http://searxng:8080

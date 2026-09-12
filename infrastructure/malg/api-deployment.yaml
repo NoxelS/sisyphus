@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: malg-api
+  namespace: malg
+  labels:
+    app.kubernetes.io/name: api
+    app.kubernetes.io/instance: malg-api
+    app.kubernetes.io/part-of: malg
+    app.kubernetes.io/component: api
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: api
+      app.kubernetes.io/instance: malg-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: api
+        app.kubernetes.io/instance: malg-api
+        app.kubernetes.io/part-of: malg
+        app.kubernetes.io/component: api
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          image: ghcr.io/noxels/malg:v0.4.0@sha256:df7f067dc09f4da6021f90e305c46bd456835a15da4c39a1962da8171d76cf36
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-c", "alembic upgrade head && exec uvicorn malg.api.app:app --host 0.0.0.0 --port 8000"]
+          envFrom:
+            - configMapRef:
+                name: runtime-config
+            - secretRef:
+                name: malg-runtime
+          env:
+            - name: MALG_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: username
+            - name: MALG_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: password
+            - name: DATABASE_URL
+              value: postgresql+psycopg://$(MALG_DB_USER):$(MALG_DB_PASSWORD)@postgresql:5432/malg
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: home
+              mountPath: /home/malg
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+        - name: home
+          emptyDir:
+            sizeLimit: 16Mi
