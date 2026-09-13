@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: postgresql
-          image: pgvector/pgvector:0.8.1-pg17
+          image: pgvector/pgvector:0.8.1-pg17@sha256:3e8b3adfd27b5707128f60956f62a793c3c9326ea8cfaf0eab7adccb5d700b21
           imagePullPolicy: IfNotPresent
           env:
             - name: POSTGRES_DB
