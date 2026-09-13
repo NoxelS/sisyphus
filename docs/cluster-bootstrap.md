@@ -126,6 +126,11 @@ the only observability UI intended for public routing. Prometheus, Alertmanager,
 Loki, Alloy, and Hubble Relay remain cluster-internal. Protect Grafana with a
 Cloudflare Access policy in addition to its generated administrator password.
 
+The dashboard-managed tunnel should map `malg.noel.fyi` to the frontend
+service `http://frontend.malg.svc.cluster.local:80`. The frontend serves the
+Malg UI and proxies its same-origin `/api/` requests to the cluster-internal
+API service; do not expose the API separately.
+
 The dashboard-managed tunnel should map `ai.noel.fyi` to
 `http://litellm.litellm.svc.cluster.local:4000`. Only the proxy port belongs on
 that route. LiteLLM authenticates API traffic, including `/metrics`, with its
