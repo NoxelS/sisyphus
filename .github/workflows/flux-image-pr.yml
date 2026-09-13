@@ -30,10 +30,19 @@ jobs:
             echo "Flux image update PR #$existing_pr already exists"
             exit 0
           fi
-          body='Flux detected a new portfolio staging image. Review the generated manifest change and CI checks before merging.'
-          gh pr create \
-            --repo "$GITHUB_REPOSITORY" \
-            --base main \
-            --head "$HEAD_BRANCH" \
-            --title "chore(portfolio): update staging image" \
-            --body "$body"
+          body='Flux detected a newer managed image. Review the generated manifest
+          change and CI checks before merging.'
+          for attempt in 1 2 3; do
+            if gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --base main \
+              --head "$HEAD_BRANCH" \
+              --title "chore: update Flux-managed images" \
+              --body "$body"; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            sleep "$((attempt * 5))"
+          done
