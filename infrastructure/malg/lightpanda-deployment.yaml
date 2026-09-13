@@ -36,7 +36,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: lightpanda
-          image: lightpanda/browser:0.3.6@sha256:bf2328538effa8392166d0cbdba9943a2c97fd19cd2e75b88c8c6f0cf03a1beb
+          image: lightpanda/browser:0.4.0@sha256:01eb5d37ba537259d60ebfe32be49d3db4c7b6d1daac23b59b8532126fe30df0
           imagePullPolicy: IfNotPresent
           command: ["/bin/lightpanda", "mcp", "--host", "0.0.0.0", "--port", "9223"]
           env:
