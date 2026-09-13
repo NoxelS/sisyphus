@@ -37,7 +37,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: frontend
-          image: ghcr.io/noxels/malg-frontend:v0.5.0@sha256:80d5b6317bc44f21ea6c215a298aac0802d4856d36a0f3c91e5a733ea0a9a2ab
+          image: ghcr.io/noxels/malg-frontend:v0.6.0@sha256:e71ea73d5b93e47320bf39603d606f9fcca08510b1dd6d44ced602e64bd57fa2
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
