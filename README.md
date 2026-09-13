@@ -34,7 +34,7 @@ storage, access, applications, observability, and update automation.
 | **Private access** | Tailscale Kubernetes Operator and a dedicated travel exit-node Connector |
 | **Secrets** | SOPS-encrypted Kubernetes Secrets with age recipients |
 | **Storage** | Rancher local-path at `/var/mnt/local-path`, `Retain`, node-local only |
-| **Applications** | Kite, LiteLLM, CPU-only Faster Whisper, and portfolio staging |
+| **Applications** | Kite, LiteLLM, and portfolio staging |
 | **Data** | Dedicated PostgreSQL releases for Kite and LiteLLM, plus Redis for LiteLLM |
 | **Observability** | Prometheus, Alertmanager, Grafana, Loki, Grafana Alloy, and Hubble |
 | **Automation** | Renovate, GitHub Actions validation, and reviewed Flux image updates |
