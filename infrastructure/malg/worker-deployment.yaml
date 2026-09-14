@@ -58,6 +58,8 @@ spec:
                   key: password
             - name: DATABASE_URL
               value: postgresql+psycopg://$(MALG_DB_USER):$(MALG_DB_PASSWORD)@postgresql:5432/malg
+            - name: MALG_BROWSER__URL
+              value: http://$(LIGHTPANDA_SERVICE_HOST):9223/mcp
             - name: HOME
               value: /home/malg
             - name: TMPDIR
