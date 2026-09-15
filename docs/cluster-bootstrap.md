@@ -95,10 +95,11 @@ Do not publish Hubble Relay through Cloudflare, a NodePort, or a load balancer.
 
 The cluster currently uses Rancher's local-path provisioner v0.0.36. Its
 `local-path` StorageClass writes to `/var/mnt/local-path` on this node, is not
-the default class, and has `Retain` reclaim policy. PostgreSQL requests one
-2 GiB `ReadWriteOnce` volume through that class. This is node-local storage:
-it is neither replicated nor a backup. Preserve the PVC and copy data to an
-off-node backup target before replacing or reinstalling the node.
+the default class, and has `Retain` reclaim policy. Kite PostgreSQL requests a
+2 GiB `ReadWriteOnce` volume and LiteLLM PostgreSQL requests 5 GiB. This is
+node-local storage: it is neither replicated nor a backup. Preserve the
+database PVCs and copy their data to an off-node backup target before replacing
+or reinstalling the node.
 
 Longhorn remains intentionally undeployed. Before introducing it, decide the
 dedicated data disk, Talos mount/UserVolumeConfig, replica count appropriate
@@ -110,7 +111,7 @@ The `cloudflare-tunnel` Flux Kustomization deploys two `cloudflared` replicas
 using a SOPS-encrypted tunnel token. The public hostname and service mapping
 are configured in the Cloudflare dashboard. The tunnel connects outbound to
 the cluster; no NodePort, LoadBalancer, Kubernetes Ingress, Gateway, Traefik,
-or Caddy is required for Kite.
+or Caddy is required for Kite or LiteLLM.
 
 The `kite` Flux Kustomization waits for the storage Kustomization. Kite runs
 one replica with anonymous users disabled, uses the standalone PostgreSQL
@@ -123,6 +124,134 @@ in-cluster service `http://grafana.monitoring.svc.cluster.local:80`. Grafana is
 the only observability UI intended for public routing. Prometheus, Alertmanager,
 Loki, Alloy, and Hubble Relay remain cluster-internal. Protect Grafana with a
 Cloudflare Access policy in addition to its generated administrator password.
+
+The dashboard-managed tunnel should map `malg.noel.fyi` to the frontend
+service `http://frontend.malg.svc.cluster.local:80`. The frontend serves the
+Malg UI and proxies its same-origin `/api/` requests to the cluster-internal
+API service; do not expose the API separately.
+
+Malg image automation scans the API/worker and frontend registries every five
+minutes and opens updates on `flux/malg-image`. GitHub enables auto-merge for
+that branch after the required pull-request checks pass, so do not merge it
+directly or bypass branch protection.
+
+The dashboard-managed tunnel should map `ai.noel.fyi` to
+`http://litellm.litellm.svc.cluster.local:4000`. Only the proxy port belongs on
+that route. LiteLLM authenticates API traffic, including `/metrics`, with its
+master or virtual keys. If Cloudflare Access is added for the administrator UI,
+scope it so it does not unintentionally block authenticated API clients.
+
+## LiteLLM proxy
+
+The `litellm` Flux Kustomization waits for storage and Cilium. It installs one
+LiteLLM proxy worker, a standalone PostgreSQL database, standalone Redis,
+Headroom, and the Solheim-backed `qwen3.8-27b` chat model. The model routes
+OpenAI-compatible chat requests to Solheim over HTTPS and reads
+`SOLHEIM_API_KEY` from the `litellm-runtime` Secret. Its LiteLLM metadata
+advertises a 262,144-token context window and permits up to three concurrent
+upstream requests. LiteLLM stores model records and records estimated request
+spend using Alibaba Cloud Model Studio's international Qwen3.8-27B on-demand
+benchmark: $0.50 per million input tokens and $3.00 per million output tokens.
+This is a comparable metered rate, not a Solheim invoice: Solheim's Coder+
+service is a flat €30/month plan with unlimited fair-use tokens. LiteLLM stores
+these records in PostgreSQL and includes prompt and response content in new
+spend-log records so requests can be traced in the administrator UI. Treat
+these records and database backups as sensitive data.
+
+PostgreSQL persists LiteLLM users, keys, budgets, and spend records on a 5 GiB
+`local-path` volume. Redis is password-protected but intentionally ephemeral:
+it backs shared virtual-key authentication and opt-in response caching, and can
+be rebuilt after a pod or node restart. Response caching has a ten-minute TTL
+and `default_off` mode, so a caller must explicitly send
+`"cache": {"use-cache": true}`. This avoids silently caching sensitive or
+agentic requests while keeping the facility ready for suitable workloads.
+
+
+The SOPS-encrypted `litellm-runtime` Secret contains a generated master key,
+stable salt, generated administrator password, and an SMTP password
+placeholder. It also supplies provider credentials referenced by the
+Git-owned model configuration. Before enabling the Solheim-backed
+`qwen3.8-27b` model or sending invitations, edit it from a trusted
+workstation:
+
+```sh
+SOPS_EDITOR="$EDITOR" sops infrastructure/litellm/litellm-runtime.sops.yaml
+```
+
+Add a `stringData` mapping containing `SOLHEIM_API_KEY` with the plain Solheim
+API key; SOPS encrypts that mapping before it reaches Git. Replace only
+`SMTP_PASSWORD: REPLACE_WITH_PROTON_SMTP_TOKEN` with the Proton SMTP token for
+`ai@noel.fyi` when invitation email is needed. Commit, push, and wait for Flux
+to apply the Secret. Because an external Secret update does not alter the
+Helm-rendered pod template, perform a controlled restart and wait for it to
+finish:
+
+```sh
+kubectl rollout restart deployment/litellm -n litellm
+kubectl rollout status deployment/litellm -n litellm
+```
+
+Keep `LITELLM_SALT_KEY` stable: changing it makes existing hashed credentials
+unusable. The local administrator username is `admin`; obtain its generated
+password through the same trusted SOPS workflow and do not use the master key
+as an everyday client credential. Invite users with the least-privileged
+suitable LiteLLM role and issue virtual keys with explicit model access,
+budgets, and rate limits once models exist. Invitation and key-notification
+emails do not include API key material; users retrieve keys from the
+authenticated UI.
+
+## Tailscale travel exit node
+
+The `tailscale` Flux Kustomization installs the official Tailscale Kubernetes
+Operator. Once its CustomResourceDefinitions are ready, the dependent
+`tailscale-exit-node` Kustomization creates one `sisyphus-exit` Connector. The
+Connector is a single pod that advertises itself as an exit node: a travel
+device explicitly selecting it sends internet-bound traffic through the
+cluster and exits through the server's Netcup public address.
+
+Talos itself does not run Tailscale and its own traffic is unaffected. The
+Connector intentionally has no subnet routes, Tailscale Ingress, Funnel,
+cluster Egress service, or Kubernetes API proxy, so it is not a path into the
+node or cluster workloads. The single-node cluster is not highly available;
+the exit node is unavailable during node, CNI, operator, or provider outages.
+
+Before Flux can authenticate the operator, edit
+`infrastructure/tailscale/operator-oauth.sops.yaml` through SOPS and replace
+both placeholders with a Tailscale OAuth client ID and secret. Create that
+client with write access limited to `General/Services`, `Devices/Core`, and
+`Keys/Auth Keys`, scoped to `tag:k8s-operator`.
+
+The tailnet policy must define `tag:k8s-operator` and
+`tag:sisyphus-exit`, let the operator own the Connector tag, auto-approve the
+exit-node tag, and grant only the intended travel user or group access to
+`autogroup:internet`. Do not grant that user access to `tag:sisyphus-exit`.
+For example, merge the following into the existing tailnet policy, replacing
+`group:travel@example.com` with the actual restricted group:
+
+```jsonc
+{
+  "tagOwners": {
+    "tag:k8s-operator": [],
+    "tag:sisyphus-exit": ["tag:k8s-operator"],
+  },
+  "autoApprovers": {
+    "exitNode": ["tag:sisyphus-exit"],
+  },
+  "grants": [
+    {
+      "src": ["group:travel@example.com"],
+      "dst": ["autogroup:internet"],
+      "ip": ["*"],
+    },
+  ],
+}
+```
+
+After reconciliation, verify `kubectl -n tailscale get connector sisyphus-exit`
+reports `ConnectorReady` and an exit node. Then select `sisyphus-exit` in the
+Tailscale client on each travel device and verify its public IP has changed to
+the Netcup server address. Selecting an exit node is explicit per client;
+normal node and workload egress remains direct.
 
 ## Observability
 
@@ -143,8 +272,10 @@ component targets remain enabled.
 The `observability-config` Kustomization waits for `observability` so the
 Prometheus Operator CRDs exist before ServiceMonitors, PodMonitors, and
 PrometheusRules are applied. It also provisions the Loki data source, the
-Sisyphus overview dashboard, initial platform alerts, and the monitoring
-namespace Cilium policy.
+Sisyphus overview dashboard, initial platform alerts, a cluster-internal
+LiteLLM metrics scrape, and the monitoring namespace Cilium policy. The
+ServiceMonitor runs in the `litellm` namespace, reads the master key from the
+local SOPS-managed Secret, and uses it to authenticate `/metrics` scrapes.
 
 Persistent observability data uses explicit `local-path` volumes:
 
@@ -171,12 +302,15 @@ restart. Never put the decoded value into Helm values or documentation.
 ## Network policy and firewall boundary
 
 Cilium is the active CNI, but kube-proxy remains enabled and kube-proxy
-replacement is disabled. No repository-managed default-deny Cilium policy or
-Talos ingress-firewall configuration exists yet. The Netcup/provider firewall
-is therefore the current public boundary. Keep public HTTP/HTTPS, NodePorts,
-and cluster-internal ports blocked; allow only restricted administration and
-stateful return traffic. Add explicit Cilium policies for `cloudflared`, Kite,
-and PostgreSQL before claiming pod ingress or egress is restricted.
+replacement is disabled. There is no cluster-wide default-deny Cilium policy
+or Talos ingress-firewall configuration. Workload-specific policies protect
+LiteLLM, its PostgreSQL and Redis services, monitoring, and portfolio staging;
+other workloads are not implicitly restricted. The LiteLLM proxy accepts
+traffic from `cloudflared` and Prometheus on port 4000, reaches only cluster
+DNS, its database and cache, Proton SMTP, and permitted external HTTPS
+endpoints. The Netcup/provider firewall remains the public origin boundary.
+Keep public HTTP/HTTPS, NodePorts, and cluster-internal ports blocked; allow
+only restricted administration and stateful return traffic.
 
 ## Secrets
 
@@ -194,7 +328,8 @@ Remaining work includes:
 
 1. application-specific network policies informed by Hubble observations;
 2. an external Alertmanager notification receiver;
-3. off-node etcd, PostgreSQL, metrics, and log recovery arrangements;
+3. off-node etcd, Kite and LiteLLM PostgreSQL, metrics, and log recovery
+   arrangements;
 4. Longhorn with a dedicated data volume, replica policy, and off-cluster
    backups.
 
@@ -212,12 +347,13 @@ credentials or SOPS private keys. Major upgrades remain manually approved from
 the Renovate Dependency Dashboard; generated Flux manifests and encrypted
 secret files are excluded.
 
-Flux remains the deployment source of truth. The portfolio staging
-`ImageUpdateAutomation` discovers new GHCR tags and pushes its setter commit to
-`flux/portfolio-staging-image`. GitHub Actions opens or updates a pull request
-from that branch into `main`. Flux reconciles the change only after the pull
-request is reviewed and merged. Do not change this automation back to pushing
-directly to `main`.
+Flux remains the deployment source of truth. Renovate manages ordinary
+dependency updates, while Flux exclusively manages portfolio staging and Malg
+image revisions through `flux/portfolio-staging-image` and
+`flux/malg-image`, respectively. GitHub Actions opens or updates review pull
+requests from those branches into `main` and enables auto-merge only for those
+two branches after required checks pass. Other update pull requests remain
+manual. Do not change either automation to push directly to `main`.
 
 Before enabling this workflow, configure GitHub branch protection for `main` to
 require pull requests and the infrastructure validation workflow, disallow

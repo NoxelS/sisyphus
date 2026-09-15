@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tailscale
+  labels:
+    # The Operator-generated exit-node pod needs TUN access and forwarding
+    # capabilities. Keep this exception limited to the dedicated namespace.
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/enforce-version: latest

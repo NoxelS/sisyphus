@@ -8,8 +8,8 @@ dependencies = []
 
 [dependency-groups]
 dev = [
-    "ruff>=0.12,<0.13",
-    "yamllint>=1.37,<1.38",
+    "ruff>=0.16,<0.17",
+    "yamllint>=1.38,<1.39",
 ]
 
 [tool.ruff]

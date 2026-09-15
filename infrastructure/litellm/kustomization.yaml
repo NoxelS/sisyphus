@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - litellm-runtime.sops.yaml
+  - postgresql-credentials.sops.yaml
+  - redis-credentials.sops.yaml
+  - headroom-deployment.yaml
+  - headroom-service.yaml
+  - litellm-ocirepository.yaml
+  - postgresql-ocirepository.yaml
+  - redis-ocirepository.yaml
+  - postgresql-helmrelease.yaml
+  - redis-helmrelease.yaml
+  - helmrelease.yaml
+  - network-policy.yaml

@@ -1,17 +1,21 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: observability-config
+  name: litellm
   namespace: flux-system
 spec:
   interval: 10m
-  path: ./infrastructure/observability-config
+  path: ./infrastructure/litellm
   prune: true
   wait: true
-  timeout: 10m
+  timeout: 20m
   dependsOn:
-    - name: observability
-    - name: litellm
+    - name: storage
+    - name: cilium
   sourceRef:
     kind: GitRepository
     name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age

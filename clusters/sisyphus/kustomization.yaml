@@ -5,7 +5,11 @@ resources:
   - cloudflare-tunnel.yaml
   - storage.yaml
   - cilium.yaml
+  - tailscale.yaml
+  - tailscale-exit-node.yaml
   - observability.yaml
   - observability-config.yaml
   - kite.yaml
+  - litellm.yaml
+  - malg.yaml
   - portfolio-staging.yaml

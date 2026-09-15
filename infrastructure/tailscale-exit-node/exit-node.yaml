@@ -1,0 +1,14 @@
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: sisyphus-exit
+  namespace: tailscale
+spec:
+  # One replica is intentional: this single-node cluster cannot provide HA.
+  replicas: 1
+  hostname: sisyphus-exit
+  tags:
+    - tag:sisyphus-exit
+  exitNode: true
+  # Do not add subnetRouter, appConnector, Ingress, Egress, or API proxy fields:
+  # this Connector is an internet exit node only, not a path into the cluster.

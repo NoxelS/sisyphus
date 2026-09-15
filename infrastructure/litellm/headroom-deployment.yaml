@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: headroom
+  namespace: litellm
+  labels:
+    app.kubernetes.io/name: headroom
+    app.kubernetes.io/instance: headroom
+    app.kubernetes.io/component: prompt-compression
+    app.kubernetes.io/part-of: litellm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: headroom
+      app.kubernetes.io/instance: headroom
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: headroom
+        app.kubernetes.io/instance: headroom
+        app.kubernetes.io/component: prompt-compression
+        app.kubernetes.io/part-of: litellm
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: headroom
+          image: ghcr.io/chopratejas/headroom:latest@sha256:50b85d8e320cfcdf1b38919bb7ae067b93ff7a8de0a93f05b2c1246370200d1c
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: HEADROOM_TELEMETRY
+              value: "off"
+            - name: HEADROOM_COMPRESS_USER_MESSAGES
+              value: "1"
+          ports:
+            - name: http
+              containerPort: 8787
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /livez
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          readinessProbe:
+            httpGet:
+              path: /livez
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: http
+            periodSeconds: 30
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          volumeMounts:
+            - name: state
+              mountPath: /home/nonroot/.headroom
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: state
+          emptyDir:
+            sizeLimit: 1Gi
+        - name: tmp
+          emptyDir:
+            sizeLimit: 256Mi

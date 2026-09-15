@@ -14,13 +14,18 @@
   "kubernetes": {
     "managerFilePatterns": [
       "/^infrastructure\\/.+\\.ya?ml$/",
-      "/^clusters\\/sisyphus\\/(?!flux-system\\/gotk-components\\.yaml$).+\\.ya?ml$/"
+      "/^clusters\\/sisyphus\\/.+\\.ya?ml$/"
     ]
   },
   "ignorePaths": [
     "**/*.sops.yaml",
     "clusters/sisyphus/flux-system/gotk-components.yaml",
-    "infrastructure/portfolio-staging/deployment.yaml"
+    "infrastructure/portfolio-staging/deployment.yaml",
+    "infrastructure/portfolio-staging/image-automation.yaml",
+    "infrastructure/malg/api-deployment.yaml",
+    "infrastructure/malg/worker-deployment.yaml",
+    "infrastructure/malg/frontend-deployment.yaml",
+    "infrastructure/malg/image-automation.yaml"
   ],
   "dependencyDashboard": true,
   "prConcurrentLimit": 5,

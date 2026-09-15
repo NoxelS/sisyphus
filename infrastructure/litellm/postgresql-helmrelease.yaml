@@ -1,0 +1,47 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: postgresql
+  namespace: litellm
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: postgresql
+    namespace: litellm
+  install:
+    createNamespace: false
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    architecture: standalone
+    image:
+      registry: registry-1.docker.io
+      repository: bitnami/postgresql
+      # This chart publishes `latest`; digest is the immutable source of truth.
+      tag: latest
+      digest: sha256:5614f19e4a5077217e53b3bd7e7f69d06af6a02919af4b90a9702e3648190c8c
+    auth:
+      existingSecret: postgresql-credentials
+      username: litellm
+      database: litellm
+      secretKeys:
+        adminPasswordKey: postgres-password
+        userPasswordKey: password
+    primary:
+      persistence:
+        enabled: true
+        storageClass: local-path
+        accessModes:
+          - ReadWriteOnce
+        size: 5Gi
+      resources:
+        requests:
+          cpu: 50m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi

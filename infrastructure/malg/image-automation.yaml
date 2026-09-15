@@ -1,0 +1,82 @@
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: malg
+  namespace: flux-system
+spec:
+  image: ghcr.io/noxels/malg
+  interval: 5m
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: malg-frontend
+  namespace: flux-system
+spec:
+  image: ghcr.io/noxels/malg-frontend
+  interval: 5m
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: malg
+  namespace: flux-system
+spec:
+  interval: 5m
+  imageRepositoryRef:
+    name: malg
+  filterTags:
+    pattern: '^v(?P<version>[0-9]+\.[0-9]+\.[0-9]+)$'
+    extract: '$version'
+  digestReflectionPolicy: Always
+  policy:
+    semver:
+      range: '>=0.0.0'
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: malg-frontend
+  namespace: flux-system
+spec:
+  interval: 5m
+  imageRepositoryRef:
+    name: malg-frontend
+  filterTags:
+    pattern: '^v(?P<version>[0-9]+\.[0-9]+\.[0-9]+)$'
+    extract: '$version'
+  digestReflectionPolicy: Always
+  policy:
+    semver:
+      range: '>=0.0.0'
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageUpdateAutomation
+metadata:
+  name: malg
+  namespace: flux-system
+spec:
+  interval: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        email: flux@sisyphus.local
+        name: Flux
+      messageTemplate: |
+        chore(malg): update images
+
+        {{- range .Changed.Changes -}}
+        {{ print .OldValue }} -> {{ println .NewValue }}
+        {{- end }}
+    push:
+      # Flux updates are reviewed through a GitHub PR before main changes.
+      branch: flux/malg-image
+  update:
+    path: ./infrastructure/malg
+    strategy: Setters
