@@ -45,9 +45,10 @@ storage, access, applications, observability, and update automation.
 2. After review and merge, Flux detects the new Git revision.
 3. Flux decrypts SOPS resources in-cluster, resolves `dependsOn` ordering, and
    reconciles the declared state.
-4. Renovate proposes dependency updates separately. Portfolio image automation
-   writes to `flux/portfolio-staging-image` and opens a review pull request; it
-   does not deploy directly to `main`.
+4. Renovate proposes ordinary dependency updates separately. Flux exclusively
+   manages portfolio staging and Malg image revisions through
+   `flux/portfolio-staging-image` and `flux/malg-image`, respectively; each
+   branch opens a review pull request and does not deploy directly to `main`.
 
 Normal Kubernetes resources belong in Git. Manual installation is reserved for
 the documented Talos, Cilium, and Flux bootstrap boundary.

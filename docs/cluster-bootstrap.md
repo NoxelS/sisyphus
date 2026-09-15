@@ -346,12 +346,13 @@ credentials or SOPS private keys. Major upgrades remain manually approved from
 the Renovate Dependency Dashboard; generated Flux manifests and encrypted
 secret files are excluded.
 
-Flux remains the deployment source of truth. The portfolio staging
-`ImageUpdateAutomation` discovers new GHCR tags and pushes its setter commit to
-`flux/portfolio-staging-image`. GitHub Actions opens or updates a pull request
-from that branch into `main`. Flux reconciles the change only after the pull
-request is reviewed and merged. Do not change this automation back to pushing
-directly to `main`.
+Flux remains the deployment source of truth. Renovate manages ordinary
+dependency updates, while Flux exclusively manages portfolio staging and Malg
+image revisions through `flux/portfolio-staging-image` and
+`flux/malg-image`, respectively. GitHub Actions opens or updates review pull
+requests from those branches into `main`. Flux reconciles each change only
+after the pull request is reviewed and merged. Do not change either automation
+back to pushing directly to `main`.
 
 Before enabling this workflow, configure GitHub branch protection for `main` to
 require pull requests and the infrastructure validation workflow, disallow
