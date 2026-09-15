@@ -27,22 +27,35 @@ jobs:
           existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --base main \
             --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number')"
           if [ -n "$existing_pr" ]; then
-            echo "Flux image update PR #$existing_pr already exists"
-            exit 0
+            pr_number="$existing_pr"
+            echo "Flux image update PR #$pr_number already exists"
+          else
+            body='Flux detected a newer managed image. Review the generated manifest
+            change and CI checks before merging.'
+            for attempt in 1 2 3; do
+              if gh pr create \
+                --repo "$GITHUB_REPOSITORY" \
+                --base main \
+                --head "$HEAD_BRANCH" \
+                --title "chore: update Flux-managed images" \
+                --body "$body"; then
+                break
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                exit 1
+              fi
+              sleep "$((attempt * 5))"
+            done
+            pr_number="$(gh pr list --repo "$GITHUB_REPOSITORY" --base main \
+              --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number')"
           fi
-          body='Flux detected a newer managed image. Review the generated manifest
-          change and CI checks before merging.'
-          for attempt in 1 2 3; do
-            if gh pr create \
-              --repo "$GITHUB_REPOSITORY" \
-              --base main \
-              --head "$HEAD_BRANCH" \
-              --title "chore: update Flux-managed images" \
-              --body "$body"; then
-              exit 0
-            fi
-            if [ "$attempt" -eq 3 ]; then
-              exit 1
-            fi
-            sleep "$((attempt * 5))"
-          done
+
+          case "$HEAD_BRANCH" in
+            flux/portfolio-staging-image|flux/malg-image)
+              echo "Enabling auto-merge for $HEAD_BRANCH PR #$pr_number"
+              gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --auto --squash
+              ;;
+            *)
+              echo "Leaving $HEAD_BRANCH PR #$pr_number for manual merge"
+              ;;
+          esac
