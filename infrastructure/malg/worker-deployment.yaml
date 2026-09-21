@@ -37,7 +37,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: worker
-          image: ghcr.io/noxels/malg:v0.10.0@sha256:a1a27921f4a413c96bd41c9a376c4ef6c0402d06cbd93ee3949e3f524134bd2b # {"$imagepolicy": "flux-system:malg"}
+          image: ghcr.io/noxels/malg:v0.11.0@sha256:84cf99075be0a170b35c3469c9e9d76b1d6c863b3fa0e3f5ce2b8df680aac4c6 # {"$imagepolicy": "flux-system:malg"}
           imagePullPolicy: IfNotPresent
           command: ["python", "-m", "malg.worker"]
           envFrom:
