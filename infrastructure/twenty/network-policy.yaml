@@ -1,0 +1,260 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: twenty-server
+  namespace: twenty
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: server
+      app.kubernetes.io/instance: server
+  ingress:
+    - fromEntities: [host]
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cloudflare-tunnel
+            k8s:app.kubernetes.io/name: cloudflared
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: twenty
+            k8s:app.kubernetes.io/name: postgresql
+            k8s:app.kubernetes.io/instance: postgresql
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: twenty
+            k8s:app.kubernetes.io/name: redis
+            k8s:app.kubernetes.io/instance: redis
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: twenty
+            k8s:app.kubernetes.io/name: minio
+            k8s:app.kubernetes.io/instance: minio
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toFQDNs:
+        - matchName: smtp.protonmail.ch
+      toPorts:
+        - ports:
+            - port: "587"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: twenty-worker
+  namespace: twenty
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: worker
+      app.kubernetes.io/instance: worker
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: twenty
+            k8s:app.kubernetes.io/name: postgresql
+            k8s:app.kubernetes.io/instance: postgresql
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: twenty
+            k8s:app.kubernetes.io/name: redis
+            k8s:app.kubernetes.io/instance: redis
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: twenty
+            k8s:app.kubernetes.io/name: minio
+            k8s:app.kubernetes.io/instance: minio
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toFQDNs:
+        - matchName: smtp.protonmail.ch
+      toPorts:
+        - ports:
+            - port: "587"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: twenty-postgresql
+  namespace: twenty
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: postgresql
+      app.kubernetes.io/instance: postgresql
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: twenty
+            k8s:app.kubernetes.io/name: server
+            k8s:app.kubernetes.io/instance: server
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: twenty
+            k8s:app.kubernetes.io/name: worker
+            k8s:app.kubernetes.io/instance: worker
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - fromEntities: [host]
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+  egress: []
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: twenty-redis
+  namespace: twenty
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/instance: redis
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: twenty
+            k8s:app.kubernetes.io/name: server
+            k8s:app.kubernetes.io/instance: server
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: twenty
+            k8s:app.kubernetes.io/name: worker
+            k8s:app.kubernetes.io/instance: worker
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP
+    - fromEntities: [host]
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP
+  egress: []
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: twenty-minio
+  namespace: twenty
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: minio
+      app.kubernetes.io/instance: minio
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: twenty
+            k8s:app.kubernetes.io/name: server
+            k8s:app.kubernetes.io/instance: server
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: twenty
+            k8s:app.kubernetes.io/name: worker
+            k8s:app.kubernetes.io/instance: worker
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: twenty
+            k8s:app.kubernetes.io/name: minio-bucket-init
+            k8s:app.kubernetes.io/instance: minio-bucket-init
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP
+    - fromEntities: [host]
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP
+  egress: []
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: twenty-minio-bucket-init
+  namespace: twenty
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: minio-bucket-init
+      app.kubernetes.io/instance: minio-bucket-init
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: twenty
+            k8s:app.kubernetes.io/name: minio
+            k8s:app.kubernetes.io/instance: minio
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"

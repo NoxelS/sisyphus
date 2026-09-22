@@ -51,7 +51,7 @@ jobs:
           fi
 
           case "$HEAD_BRANCH" in
-            flux/portfolio-staging-image|flux/malg-image)
+            flux/portfolio-staging-image|flux/malg-image|flux/twenty-image)
               echo "Enabling auto-merge for $HEAD_BRANCH PR #$pr_number"
               gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --auto --squash
               ;;

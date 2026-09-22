@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - postgresql-credentials.sops.yaml
+  - twenty-runtime.sops.yaml
+  - runtime-config.yaml
+  - postgresql-pvc.yaml
+  - redis-pvc.yaml
+  - minio-pvc.yaml
+  - postgresql-service.yaml
+  - postgresql-statefulset.yaml
+  - redis-service.yaml
+  - redis-deployment.yaml
+  - minio-service.yaml
+  - minio-deployment.yaml
+  - minio-bucket-init.yaml
+  - server-service.yaml
+  - server-deployment.yaml
+  - worker-deployment.yaml
+  - network-policy.yaml
+  - image-automation.yaml
