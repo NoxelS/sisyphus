@@ -29,7 +29,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: postgresql
-          image: postgres:16@sha256:95f10a11c35e86cdbede5187774248e308f52318136f3d5602004b69d62b0a4a
+          image: postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6
           imagePullPolicy: IfNotPresent
           env:
             - name: POSTGRES_DB
