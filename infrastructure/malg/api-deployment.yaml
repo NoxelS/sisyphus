@@ -37,7 +37,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api
-          image: ghcr.io/noxels/malg:v0.12.0@sha256:98822f8b77a953402ee104a1a903d421269da3aa04ee46049c342f784317552b # {"$imagepolicy": "flux-system:malg"}
+          image: ghcr.io/noxels/malg:v0.13.0@sha256:6e65eaf228fc679d95781c5a807789e97c53ba92f6f1e7149784af59a426f74f # {"$imagepolicy": "flux-system:malg"}
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "-c", "alembic upgrade head && exec uvicorn malg.api.app:app --host 0.0.0.0 --port 8000"]
           envFrom:
