@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: malg-crm-schema
+  namespace: twenty
+  labels:
+    app.kubernetes.io/name: malg-crm-schema
+    app.kubernetes.io/part-of: malg
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: malg-crm-schema
+        app.kubernetes.io/part-of: malg
+    spec:
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: schema
+          image: ghcr.io/noxels/malg:v0.12.0@sha256:98822f8b77a953402ee104a1a903d421269da3aa04ee46049c342f784317552b # {"$imagepolicy": "flux-system:malg"}
+          command: ["python", "-m", "malg.crm", "schema", "apply"]
+          env:
+            - name: MALG_TWENTY__BASE_URL
+              value: http://twenty.twenty.svc.cluster.local:3000
+            - name: MALG_TWENTY__PUBLIC_URL
+              value: https://twenty.noel.fyi
+            - name: MALG_TWENTY__WORKSPACE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: malg-crm-schema-key
+                  key: workspace_id
+            - name: MALG_TWENTY_SCHEMA__API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: malg-crm-schema-key
+                  key: api_key
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 32Mi

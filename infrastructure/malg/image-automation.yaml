@@ -21,6 +21,8 @@ kind: ImagePolicy
 metadata:
   name: malg
   namespace: flux-system
+  labels:
+    malg-image-policy: managed
 spec:
   interval: 5m
   imageRepositoryRef:
@@ -38,6 +40,8 @@ kind: ImagePolicy
 metadata:
   name: malg-frontend
   namespace: flux-system
+  labels:
+    malg-image-policy: managed
 spec:
   interval: 5m
   imageRepositoryRef:
@@ -78,5 +82,8 @@ spec:
       # Flux updates are reviewed through a GitHub PR before main changes.
       branch: flux/malg-image
   update:
-    path: ./infrastructure/malg
+    path: ./
     strategy: Setters
+    policySelector:
+      matchLabels:
+        malg-image-policy: managed

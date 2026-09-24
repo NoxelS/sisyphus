@@ -22,3 +22,5 @@ jobs:
         run: uv run --no-project --with ruff==0.12.10 ruff check .
       - name: Check SOPS configuration
         run: test -s .sops.yaml
+      - name: Check MALG release consistency
+        run: uv run --no-project --with pyyaml python scripts/check_malg_release.py
