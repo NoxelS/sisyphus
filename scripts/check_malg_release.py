@@ -50,7 +50,10 @@ def _release_labels(documents: list[dict[str, Any]]) -> list[str]:
             continue
         metadata = document.get("metadata", {})
         spec = document.get("spec", {})
-        for source in (metadata.get("labels", {}), spec.get("commonMetadata", {}).get("labels", {})):
+        for source in (
+            metadata.get("labels", {}),
+            spec.get("commonMetadata", {}).get("labels", {}),
+        ):
             value = source.get("malg-release") if isinstance(source, dict) else None
             if value is not None:
                 labels.append(str(value))
@@ -91,7 +94,10 @@ def check(root: Path, *, allow_reviewed_first_cutover: bool = False) -> None:
             raise ValueError(f"{key} digest must use lowercase hexadecimal")
     if not isinstance(release["contract_version"], int) or release["contract_version"] < 1:
         raise ValueError("contract_version must be a positive integer")
-    if not isinstance(release["contract_hash"], str) or not re.fullmatch(r"[0-9a-f]{64}", release["contract_hash"]):
+    if (
+        not isinstance(release["contract_hash"], str)
+        or not re.fullmatch(r"[0-9a-f]{64}", release["contract_hash"])
+    ):
         raise ValueError("contract_hash must be a SHA-256 hex digest")
     if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", str(release["release_tag"])):
         raise ValueError("release_tag must be a semantic vX.Y.Z tag")
@@ -113,8 +119,11 @@ def check(root: Path, *, allow_reviewed_first_cutover: bool = False) -> None:
         name = document.get("metadata", {}).get("name")
         if name not in expected_names:
             continue
+        template = document.get("spec", {}).get("template")
+        if not isinstance(template, dict):
+            continue
         seen_names.add(str(name))
-        pod_spec = document.get("spec", {}).get("template", {}).get("spec", {})
+        pod_spec = template.get("spec", {})
         containers = list(pod_spec.get("containers", [])) + list(
             pod_spec.get("initContainers", [])
         )
@@ -193,7 +202,10 @@ def check(root: Path, *, allow_reviewed_first_cutover: bool = False) -> None:
         expected_command = startup_commands.get(name)
         if expected_command is None:
             continue
-        pod_spec = document.get("spec", {}).get("template", {}).get("spec", {})
+        template = document.get("spec", {}).get("template")
+        if not isinstance(template, dict):
+            continue
+        pod_spec = template.get("spec", {})
         command = pod_spec.get("containers", [{}])[0].get("command")
         if command != expected_command:
             raise ValueError(
