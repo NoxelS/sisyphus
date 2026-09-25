@@ -4,11 +4,11 @@ metadata:
   name: malg
   namespace: flux-system
   labels:
-    malg-release: v0.14.0
+    malg-release: v0.15.0
 spec:
   commonMetadata:
     labels:
-      malg-release: v0.14.0
+      malg-release: v0.15.0
   interval: 10m
   path: ./infrastructure/malg
   prune: true

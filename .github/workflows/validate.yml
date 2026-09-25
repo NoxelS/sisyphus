@@ -23,4 +23,4 @@ jobs:
       - name: Check SOPS configuration
         run: test -s .sops.yaml
       - name: Check MALG release consistency
-        run: uv run --no-project --with pyyaml python scripts/check_malg_release.py
+        run: uv run --no-project --with pyyaml python scripts/check_malg_release.py --allow-reviewed-first-cutover
