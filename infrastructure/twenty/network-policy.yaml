@@ -30,6 +30,19 @@ spec:
         - ports:
             - port: "3000"
               protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: malg
+            k8s:app.kubernetes.io/name: api
+            k8s:app.kubernetes.io/instance: malg-api
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: malg
+            k8s:app.kubernetes.io/name: worker
+            k8s:app.kubernetes.io/instance: malg-worker
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
   egress:
     - toEndpoints:
         - matchLabels:
