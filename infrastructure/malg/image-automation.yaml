@@ -84,6 +84,3 @@ spec:
   update:
     path: ./
     strategy: Setters
-    policySelector:
-      matchLabels:
-        malg-image-policy: managed
