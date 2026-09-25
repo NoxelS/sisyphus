@@ -90,8 +90,6 @@ spec:
                   key: password
             - name: DATABASE_URL
               value: postgresql+psycopg://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgresql:5432/malg
-            - name: MALG_CRM_CUTOVER_APPROVED
-              value: "1"
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
