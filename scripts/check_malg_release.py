@@ -149,6 +149,32 @@ def check(root: Path, *, allow_reviewed_first_cutover: bool = False) -> None:
     if migration is None:
         raise ValueError("missing malg-migration Job")
     migration_pod = migration.get("spec", {}).get("template", {}).get("spec", {})
+    database_ready = next(
+        (
+            container
+            for container in migration_pod.get("initContainers", [])
+            if container.get("name") == "database-ready"
+        ),
+        None,
+    )
+    database_ready_command = (
+        database_ready.get("command") if isinstance(database_ready, dict) else None
+    )
+    if (
+        not isinstance(database_ready_command, list)
+        or database_ready_command[:2] != ["python", "-c"]
+        or len(database_ready_command) < 3
+        or not isinstance(database_ready_command[2], str)
+    ):
+        raise ValueError("migration database-ready command must be valid Python")
+    try:
+        compile(
+            database_ready_command[2],
+            "<malg-migration database-ready>",
+            "exec",
+        )
+    except SyntaxError as exc:
+        raise ValueError("migration database-ready command must be valid Python") from exc
     if migration_pod.get("automountServiceAccountToken") is not False:
         raise ValueError("migration Job must disable the service-account token")
     pod_security = migration_pod.get("securityContext", {})

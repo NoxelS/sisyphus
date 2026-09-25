@@ -39,7 +39,9 @@ spec:
               import time
               import psycopg
 
-              url = os.environ["DATABASE_URL"]
+              url = os.environ["DATABASE_URL"].replace(
+                  "postgresql+psycopg://", "postgresql://", 1
+              )
               for attempt in range(300):
                   try:
                       with psycopg.connect(url, connect_timeout=1) as conn:
