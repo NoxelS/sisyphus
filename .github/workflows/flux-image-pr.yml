@@ -50,12 +50,3 @@ jobs:
               --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number')"
           fi
 
-          case "$HEAD_BRANCH" in
-            flux/portfolio-staging-image|flux/malg-image)
-              echo "Enabling auto-merge for $HEAD_BRANCH PR #$pr_number"
-              gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --auto --squash
-              ;;
-            *)
-              echo "Leaving $HEAD_BRANCH PR #$pr_number for manual merge"
-              ;;
-          esac

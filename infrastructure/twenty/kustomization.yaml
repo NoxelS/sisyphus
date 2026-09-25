@@ -3,21 +3,20 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - postgresql-credentials.sops.yaml
-  - malg-runtime.sops.yaml
+  - twenty-runtime.sops.yaml
   - runtime-config.yaml
   - postgresql-pvc.yaml
+  - redis-pvc.yaml
+  - minio-pvc.yaml
   - postgresql-service.yaml
   - postgresql-statefulset.yaml
-  - searxng-settings.yaml
-  - searxng-deployment.yaml
-  - searxng-service.yaml
-  - lightpanda-deployment.yaml
-  - lightpanda-service.yaml
-  - api-deployment.yaml
-  - api-service.yaml
+  - redis-service.yaml
+  - redis-deployment.yaml
+  - minio-service.yaml
+  - minio-deployment.yaml
+  - minio-bucket-init.yaml
+  - server-service.yaml
+  - server-deployment.yaml
   - worker-deployment.yaml
-  - frontend-deployment.yaml
-  - frontend-service.yaml
   - network-policy.yaml
-  - migration-job.yaml
   - image-automation.yaml

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: runtime-config
+  namespace: twenty
+data:
+  NODE_ENV: production
+  SERVER_URL: https://twenty.noel.fyi
+  IS_CONFIG_VARIABLES_IN_DB_ENABLED: "false"
+  IS_MULTIWORKSPACE_ENABLED: "false"
+  STORAGE_TYPE: S_3
+  STORAGE_S3_NAME: twenty
+  STORAGE_S3_REGION: us-east-1
+  STORAGE_S3_ENDPOINT: http://minio:9000
+  STORAGE_S3_PRESIGNED_URL_ENABLED: "false"
+  EMAIL_DRIVER: smtp
+  EMAIL_FROM_ADDRESS: ai@noel.fyi
+  EMAIL_FROM_NAME: Twenty CRM
+  EMAIL_SMTP_HOST: smtp.protonmail.ch
+  EMAIL_SMTP_PORT: "587"
+  EMAIL_SMTP_USER: ai@noel.fyi
+  EMAIL_SMTP_NO_TLS: "false"

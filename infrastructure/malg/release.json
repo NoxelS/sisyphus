@@ -1,0 +1,9 @@
+{
+  "backend_image": "ghcr.io/noxels/malg:v0.14.0@sha256:9dcae803cb74cd9c4146ce7e5af0e0cf7956d12eb518e24e4602beb53947148e",
+  "contract_hash": "0a8579fb34002fcde3e78082cf610de57b0fe8618de55683f5e6a0a75eb07bb1",
+  "contract_version": 1,
+  "frontend_image": "ghcr.io/noxels/malg-frontend:v0.14.0@sha256:53f675110d1aee7a0f76b45dd7dfec98012ff9f734e3c536b496171be207b45c",
+  "release_tag": "v0.14.0",
+  "required_database_revision": "20260924_01",
+  "source_sha": "9d9f0f5a0160a950d0cf2e0a12417d7d16872448"
+}

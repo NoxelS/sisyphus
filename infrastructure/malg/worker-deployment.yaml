@@ -39,7 +39,7 @@ spec:
         - name: worker
           image: ghcr.io/noxels/malg:v0.15.0@sha256:84d62c82ca529a6b1dc5404aede33375a93a088daf16b07173fb58b6343b5e58 # {"$imagepolicy": "flux-system:malg"}
           imagePullPolicy: IfNotPresent
-          command: ["python", "-m", "malg.worker"]
+          command: ["/bin/sh", "-c", "python -m malg.database.wait_for_schema --timeout-seconds 300 && exec python -m malg.worker"]
           envFrom:
             - configMapRef:
                 name: runtime-config

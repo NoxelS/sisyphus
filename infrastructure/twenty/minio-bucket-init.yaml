@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-bucket-init
+  namespace: twenty
+  labels:
+    app.kubernetes.io/name: minio-bucket-init
+    app.kubernetes.io/instance: minio-bucket-init
+    app.kubernetes.io/part-of: twenty
+    app.kubernetes.io/component: init
+spec:
+  backoffLimit: 12
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: minio-bucket-init
+        app.kubernetes.io/instance: minio-bucket-init
+        app.kubernetes.io/part-of: twenty
+        app.kubernetes.io/component: init
+    spec:
+      automountServiceAccountToken: false
+      restartPolicy: OnFailure
+      containers:
+        - name: mc
+          image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z-cpuv1@sha256:95b5f3f7969a5c5a9f3a700ba72d5c84172819e13385aaf916e237cf111ab868
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: twenty-runtime
+                  key: STORAGE_S3_ACCESS_KEY_ID
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: twenty-runtime
+                  key: STORAGE_S3_SECRET_ACCESS_KEY
+          command: ["/bin/sh", "-c"]
+          args:
+            - >-
+              until mc alias set local http://minio:9000 "$MINIO_ROOT_USER"
+              "$MINIO_ROOT_PASSWORD"; do sleep 5; done;
+              mc mb --ignore-existing local/twenty

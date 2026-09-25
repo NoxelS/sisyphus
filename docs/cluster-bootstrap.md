@@ -96,10 +96,14 @@ Do not publish Hubble Relay through Cloudflare, a NodePort, or a load balancer.
 The cluster currently uses Rancher's local-path provisioner v0.0.36. Its
 `local-path` StorageClass writes to `/var/mnt/local-path` on this node, is not
 the default class, and has `Retain` reclaim policy. Kite PostgreSQL requests a
-2 GiB `ReadWriteOnce` volume and LiteLLM PostgreSQL requests 5 GiB. This is
-node-local storage: it is neither replicated nor a backup. Preserve the
-database PVCs and copy their data to an off-node backup target before replacing
-or reinstalling the node.
+2 GiB `ReadWriteOnce` volume and LiteLLM PostgreSQL requests 5 GiB. Twenty adds
+node-local `ReadWriteOnce` PVCs for PostgreSQL (10 GiB), Redis (1 GiB), and
+private MinIO object storage (10 GiB). This data is neither replicated nor a
+backup. Preserve the database and object-storage PVCs and copy their data to
+an off-node backup target before replacing or reinstalling the node. Twenty
+recovery order is: restore PostgreSQL, restore MinIO data, then deploy Twenty
+with the unchanged `ENCRYPTION_KEY`; losing that key makes database-encrypted
+Twenty data unrecoverable.
 
 Longhorn remains intentionally undeployed. Before introducing it, decide the
 dedicated data disk, Talos mount/UserVolumeConfig, replica count appropriate
@@ -131,15 +135,33 @@ Malg UI and proxies its same-origin `/api/` requests to the cluster-internal
 API service; do not expose the API separately.
 
 Malg image automation scans the API/worker and frontend registries every five
-minutes and opens updates on `flux/malg-image`. GitHub enables auto-merge for
-that branch after the required pull-request checks pass, so do not merge it
-directly or bypass branch protection.
+minutes and opens updates on `flux/malg-image`. Twenty image automation scans
+stable v2 releases and opens updates on `flux/twenty-image`. GitHub enables
+auto-merge for those branches after the required pull-request checks pass, so
+do not merge them directly or bypass branch protection.
 
 The dashboard-managed tunnel should map `ai.noel.fyi` to
 `http://litellm.litellm.svc.cluster.local:4000`. Only the proxy port belongs on
 that route. LiteLLM authenticates API traffic, including `/metrics`, with its
 master or virtual keys. If Cloudflare Access is added for the administrator UI,
 scope it so it does not unintentionally block authenticated API clients.
+
+Twenty is deployed as a single-workspace, single-replica release in the
+`twenty` namespace. Its PostgreSQL, Redis, and private MinIO data use
+node-local `Retain` PVCs; no MinIO API or console route is public. Before
+reconciliation, edit `infrastructure/twenty/twenty-runtime.sops.yaml` with
+SOPS and replace the encrypted SMTP placeholder with the existing Proton token
+for `ai@noel.fyi`:
+
+```sh
+SOPS_EDITOR="$EDITOR" sops infrastructure/twenty/twenty-runtime.sops.yaml
+```
+
+Keep `ENCRYPTION_KEY` unchanged for the lifetime of the workspace. The
+dashboard-managed Cloudflare Tunnel should map `twenty.noel.fyi` to
+`http://twenty.twenty.svc.cluster.local:3000`; this repository deliberately
+does not create an Ingress, Gateway, NodePort, LoadBalancer, or separate API
+hostname.
 
 ## LiteLLM proxy
 
@@ -348,12 +370,13 @@ the Renovate Dependency Dashboard; generated Flux manifests and encrypted
 secret files are excluded.
 
 Flux remains the deployment source of truth. Renovate manages ordinary
-dependency updates, while Flux exclusively manages portfolio staging and Malg
-image revisions through `flux/portfolio-staging-image` and
-`flux/malg-image`, respectively. GitHub Actions opens or updates review pull
-requests from those branches into `main` and enables auto-merge only for those
-two branches after required checks pass. Other update pull requests remain
-manual. Do not change either automation to push directly to `main`.
+dependency updates, while Flux exclusively manages portfolio staging, Malg, and
+Twenty image revisions through `flux/portfolio-staging-image`,
+`flux/malg-image`, and `flux/twenty-image`, respectively. GitHub Actions opens
+or updates review pull requests from those branches into `main` and enables
+auto-merge only for those three branches after required checks pass. Other
+update pull requests remain manual. Do not change any automation to push
+directly to `main`.
 
 Before enabling this workflow, configure GitHub branch protection for `main` to
 require pull requests and the infrastructure validation workflow, disallow

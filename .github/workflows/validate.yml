@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.1.0
+      - uses: astral-sh/setup-uv@v10.2.0
         with:
           python-version: '3.13'
       - name: Lint YAML
@@ -22,3 +22,5 @@ jobs:
         run: uv run --no-project --with ruff==0.12.10 ruff check .
       - name: Check SOPS configuration
         run: test -s .sops.yaml
+      - name: Check MALG release consistency
+        run: uv run --no-project --with pyyaml python scripts/check_malg_release.py

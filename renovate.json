@@ -37,6 +37,10 @@
       "labels": ["dependencies", "major"]
     },
     {
+      "matchPackageNames": ["twentycrm/twenty"],
+      "enabled": false
+    },
+    {
       "matchDatasources": ["docker"],
       "pinDigests": true,
       "labels": ["dependencies", "container"]

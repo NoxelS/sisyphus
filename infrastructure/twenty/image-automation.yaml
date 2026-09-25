@@ -1,0 +1,55 @@
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: twenty
+  namespace: flux-system
+spec:
+  image: twentycrm/twenty
+  interval: 5m
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: twenty
+  namespace: flux-system
+spec:
+  interval: 5m
+  imageRepositoryRef:
+    name: twenty
+  filterTags:
+    pattern: '^v(?P<version>2\.[0-9]+\.[0-9]+)$'
+    extract: '$version'
+  digestReflectionPolicy: Always
+  policy:
+    semver:
+      range: '>=2.0.0 <3.0.0'
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageUpdateAutomation
+metadata:
+  name: twenty
+  namespace: flux-system
+spec:
+  interval: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        email: flux@sisyphus.local
+        name: Flux
+      messageTemplate: |
+        chore(twenty): update image
+
+        {{- range .Changed.Changes -}}
+        {{ print .OldValue }} -> {{ println .NewValue }}
+        {{- end }}
+    push:
+      branch: flux/twenty-image
+  update:
+    path: ./infrastructure/twenty
+    strategy: Setters
