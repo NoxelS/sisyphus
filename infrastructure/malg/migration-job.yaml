@@ -34,17 +34,22 @@ spec:
           command:
             - python
             - -c
-            - >-
-              import os,time,psycopg;
-              url=os.environ['DATABASE_URL'];
+            - |
+              import os
+              import time
+              import psycopg
+
+              url = os.environ["DATABASE_URL"]
               for attempt in range(300):
-                try:
-                  with psycopg.connect(url, connect_timeout=1) as conn:
-                    with conn.cursor() as cur: cur.execute('SELECT 1')
-                  break
-                except Exception:
-                  if attempt == 299: raise
-                  time.sleep(1)
+                  try:
+                      with psycopg.connect(url, connect_timeout=1) as conn:
+                          with conn.cursor() as cur:
+                              cur.execute("SELECT 1")
+                      break
+                  except Exception:
+                      if attempt == 299:
+                          raise
+                      time.sleep(1)
           env:
             - name: POSTGRES_USER
               valueFrom:
