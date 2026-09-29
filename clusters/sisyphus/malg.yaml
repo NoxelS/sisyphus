@@ -3,12 +3,7 @@ kind: Kustomization
 metadata:
   name: malg
   namespace: flux-system
-  labels:
-    malg-release: v0.15.0
 spec:
-  commonMetadata:
-    labels:
-      malg-release: v0.15.0
   interval: 10m
   path: ./infrastructure/malg
   prune: true
@@ -18,11 +13,6 @@ spec:
     - name: cilium
     - name: litellm
     - name: malg-crm-schema
-      readyExpr: >-
-        dep.spec.commonMetadata.labels['malg-release'] ==
-        self.spec.commonMetadata.labels['malg-release'] &&
-        dep.status.conditions.exists(e, e.type == 'Ready' && e.status == 'True') &&
-        dep.metadata.generation == dep.status.observedGeneration
   sourceRef:
     kind: GitRepository
     name: flux-system
