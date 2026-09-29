@@ -76,7 +76,7 @@ spec:
       containers:
         - name: migration
           image: ghcr.io/noxels/malg:v0.15.0@sha256:84d62c82ca529a6b1dc5404aede33375a93a088daf16b07173fb58b6343b5e58 # {"$imagepolicy": "flux-system:malg"}
-          command: ["alembic", "upgrade", "20260924_01"]
+          command: ["alembic", "upgrade", "head"]
           env:
             - name: POSTGRES_USER
               valueFrom:
@@ -90,8 +90,6 @@ spec:
                   key: password
             - name: DATABASE_URL
               value: postgresql+psycopg://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgresql:5432/malg
-            - name: MALG_CRM_CUTOVER_APPROVED
-              value: "1"
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

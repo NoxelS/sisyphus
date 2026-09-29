@@ -3,12 +3,7 @@ kind: Kustomization
 metadata:
   name: malg-crm-schema
   namespace: flux-system
-  labels:
-    malg-release: v0.15.0
 spec:
-  commonMetadata:
-    labels:
-      malg-release: v0.15.0
   interval: 10m
   path: ./infrastructure/malg/crm-schema
   prune: true

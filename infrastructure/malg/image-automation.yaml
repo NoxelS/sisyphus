@@ -82,5 +82,5 @@ spec:
       # Flux updates are reviewed through a GitHub PR before main changes.
       branch: flux/malg-image
   update:
-    path: ./
+    path: ./infrastructure/malg
     strategy: Setters

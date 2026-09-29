@@ -18,51 +18,6 @@ jobs:
     if: startsWith(github.ref, 'refs/heads/flux/')
     runs-on: ubuntu-latest
     steps:
-      - name: Check out Flux branch
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ github.ref_name }}
-          fetch-depth: 0
-      - uses: astral-sh/setup-uv@v10.2.0
-        with:
-          python-version: '3.13'
-
-      - name: Synchronize MALG release tuple
-        if: github.ref_name == 'flux/malg-image'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          backend_ref="$(grep -Eo 'ghcr\.io/noxels/malg:v[0-9]+\.[0-9]+\.[0-9]+' infrastructure/malg/{api-deployment.yaml,worker-deployment.yaml,crm-schema/job.yaml,migration-job.yaml} | head -n1 | cut -d: -f2-)"
-          frontend_ref="$(grep -Eo 'ghcr\.io/noxels/malg-frontend:v[0-9]+\.[0-9]+\.[0-9]+' infrastructure/malg/frontend-deployment.yaml | head -n1 | cut -d: -f2-)"
-          backend_tag="${backend_ref#*:}"
-          frontend_tag="${frontend_ref#*:}"
-          if [ -z "$backend_tag" ] || [ "$backend_tag" != "$frontend_tag" ] || ! [[ "$backend_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo 'MALG backend and frontend references must use the same vX.Y.Z tag' >&2
-            exit 1
-          fi
-          tmpdir="$(mktemp -d)"
-          trap 'rm -rf "$tmpdir"' EXIT
-          for attempt in $(seq 1 12); do
-            if gh release download "$backend_tag" --repo NoxelS/malg --pattern malg-release.json --dir "$tmpdir" --clobber; then
-              break
-            fi
-            if [ "$attempt" -eq 12 ]; then
-              echo "matching MALG release asset was not published after 12 attempts" >&2
-              exit 1
-            fi
-            sleep 10
-          done
-          uv run --no-project --with pyyaml python scripts/sync_malg_release.py "$tmpdir/malg-release.json"
-          uv run --no-project --with pyyaml python scripts/check_malg_release.py --allow-reviewed-first-cutover
-          git add infrastructure/malg/release.json clusters/sisyphus/malg.yaml clusters/sisyphus/malg-crm-schema.yaml
-          if ! git diff --cached --quiet; then
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git commit -m "chore: synchronize MALG release tuple"
-            git push origin HEAD:"$GITHUB_REF_NAME"
-          fi
-
       - name: Open or update pull request
         env:
           GH_TOKEN: ${{ github.token }}
@@ -95,5 +50,6 @@ jobs:
               --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number')"
           fi
           if [ "$HEAD_BRANCH" = 'flux/malg-image' ]; then
-            gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --auto --squash
+            gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --auto --squash \
+              --match-head-commit "$GITHUB_SHA"
           fi

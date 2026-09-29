@@ -134,14 +134,20 @@ service `http://frontend.malg.svc.cluster.local:80`. The frontend serves the
 Malg UI and proxies its same-origin `/api/` requests to the cluster-internal
 API service; do not expose the API separately.
 
-Malg image automation scans the API/worker and frontend registries every five
-minutes and opens updates on `flux/malg-image`. Twenty image automation scans
-stable v2 releases and opens updates on `flux/twenty-image`. The MALG branch
-also synchronizes the immutable release tuple and auto-merges only after
-`static-checks` passes. Other Flux branches and Renovate pull requests remain
-manual; no automation writes directly to `main`. The isolated MALG migration
-Job carries the playground-only `MALG_CRM_CUTOVER_APPROVED` approval, while
-MALG release automation does not.
+MALG image automation scans the API/worker and frontend registries every five
+minutes and narrows its setters to `infrastructure/malg`. It opens a reviewed
+update on `flux/malg-image`; the PR is MALG-only and auto-merges only after
+`static-checks` passes with a matching head commit. The generated branch is
+deleted after merge so the next update starts from current `main`; no workflow
+commits manifests or resets branches.
+
+MALG backend and frontend images are immutable digest-pinned artifacts sharing
+one semantic tag. The deployment checker rejects mixed tags, missing workloads,
+release metadata, and unsafe migration settings. The migration Job runs
+`alembic upgrade head` using the bundled image migration graph, while API and
+worker startup waits for that schema. Its force annotation and the CRM schema
+Kustomization's `force: true` rerun Jobs for changed images. Runtime CRM
+contract compatibility checks remain in place during rolling updates.
 
 The dashboard-managed tunnel should map `ai.noel.fyi` to
 `http://litellm.litellm.svc.cluster.local:4000`. Only the proxy port belongs on
