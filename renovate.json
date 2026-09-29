@@ -25,7 +25,9 @@
     "infrastructure/malg/api-deployment.yaml",
     "infrastructure/malg/worker-deployment.yaml",
     "infrastructure/malg/frontend-deployment.yaml",
-    "infrastructure/malg/image-automation.yaml"
+    "infrastructure/malg/image-automation.yaml",
+    "infrastructure/malg/crm-schema/job.yaml",
+    "infrastructure/malg/migration-job.yaml"
   ],
   "dependencyDashboard": true,
   "prConcurrentLimit": 5,
