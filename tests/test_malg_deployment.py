@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import shutil
 import sys
 import tempfile
@@ -27,11 +28,9 @@ class MalgDeploymentCheckerTests(unittest.TestCase):
     def test_worker_image_mismatch_fails(self) -> None:
         root = self.copy_tree()
         path = root / "infrastructure/malg/worker-deployment.yaml"
+        text = path.read_text(encoding="utf-8")
         path.write_text(
-            path.read_text().replace(
-                "sha256:84d62c82ca529a6b1dc5404aede33375a93a088daf16b07173fb58b6343b5e58",
-                "sha256:" + "0" * 64,
-            ),
+            re.sub(r"@sha256:[0-9a-f]{64}", "@sha256:" + "0" * 64, text, count=1),
             encoding="utf-8",
         )
         with self.assertRaisesRegex(ValueError, "worker image"):
