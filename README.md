@@ -73,3 +73,5 @@ the documented Talos, Cilium, and Flux bootstrap boundary.
 <div align="center">
   <sub>Named after the king condemned to push the same rock forever—except this rock reconciles itself.</sub>
 </div>
+
+<!-- Temporary CI workflow smoke test; close without merging. -->
