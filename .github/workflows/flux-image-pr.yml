@@ -50,6 +50,7 @@ jobs:
               --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number')"
           fi
           if [ "$HEAD_BRANCH" = 'flux/malg-image' ]; then
-            gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --auto --squash \
+            # Preserve Flux commits in main when its push branch is reused.
+            gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --auto --merge \
               --match-head-commit "$GITHUB_SHA"
           fi
