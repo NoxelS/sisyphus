@@ -379,8 +379,9 @@ exclusively manages portfolio staging, MALG, and Twenty image revisions through
 `flux/portfolio-staging-image`, `flux/malg-image`, and `flux/twenty-image`.
 The generated branches dispatch PR handling to the workflow on current `main`.
 That workflow allows only the expected image manifest files and requests merge
-commits for all three branches. The required `static-checks` gate controls
-their merges.
+commits for all three branches. It merges current `main` into a generated
+branch when needed so required checks run against an up-to-date base. The
+required `static-checks` gate controls their merges.
 
 Renovate auto-merges minor, patch, pin, and digest updates for stateless
 application images (cloudflared, Headroom, SearXNG, and Lightpanda) and the Kite
