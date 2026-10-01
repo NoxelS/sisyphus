@@ -8,3 +8,4 @@ spec:
   url: oci://registry-1.docker.io/bitnamicharts/postgresql
   ref:
     tag: 18.8.12
+    digest: sha256:a501179fbc20fd33d426444213ab8e1446cf981fb554788e93e2e250b245319e
