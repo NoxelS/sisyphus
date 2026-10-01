@@ -135,11 +135,12 @@ Malg UI and proxies its same-origin `/api/` requests to the cluster-internal
 API service; do not expose the API separately.
 
 MALG image automation scans the API/worker and frontend registries every five
-minutes and narrows its setters to `infrastructure/malg`. It opens a reviewed
-update on `flux/malg-image`; the PR is MALG-only and auto-merges only after
-`static-checks` passes with a matching head commit. The generated branch is
-deleted after merge so the next update starts from current `main`; no workflow
-commits manifests or resets branches.
+minutes and narrows its setters to `infrastructure/malg`. It opens an update on
+`flux/malg-image` and auto-merges after `static-checks` passes with a matching
+head commit. The branch can be reused by Flux. Its PRs use merge commits so
+the next update retains the ancestry of changes already merged into `main`.
+The branch push workflow dispatches PR handling to the workflow on current
+`main`, preventing an old branch copy from restoring an outdated merge policy.
 
 MALG backend and frontend images are immutable digest-pinned artifacts sharing
 one semantic tag. The deployment checker rejects mixed tags, missing workloads,
@@ -371,20 +372,28 @@ decided first.
 
 ## Dependency and image update workflow
 
-Renovate is intended to run as the GitHub App for this repository. It opens
-reviewable pull requests for Helm chart versions, Kubernetes container images,
-GitHub Actions, and Python tooling. Renovate must not receive cluster
-credentials or SOPS private keys. Major upgrades remain manually approved from
-the Renovate Dependency Dashboard; generated Flux manifests and encrypted
-secret files are excluded.
-Flux remains the deployment source of truth. Renovate manages ordinary
-dependency updates, while Flux exclusively manages portfolio staging, Malg, and
-Twenty image revisions through `flux/portfolio-staging-image`,
-`flux/malg-image`, and `flux/twenty-image`, respectively. GitHub Actions opens
-or updates review pull requests from those branches into `main`; only the MALG
-image/release-tuple branch requests auto-merge after `static-checks` passes.
-Other Flux and Renovate pull requests remain manual. Do not change any
-automation to push directly to `main`.
+Renovate runs as the GitHub App for this repository. It opens pull requests for
+Helm chart versions, Kubernetes container images, GitHub Actions, and Python
+tooling. It must not receive cluster credentials or SOPS private keys. Flux
+exclusively manages portfolio staging, MALG, and Twenty image revisions through
+`flux/portfolio-staging-image`, `flux/malg-image`, and `flux/twenty-image`.
+The generated branches dispatch PR handling to the workflow on current `main`.
+That workflow allows only the expected image manifest files and requests merge
+commits for all three branches. The required `static-checks` gate controls
+their merges.
+
+Renovate auto-merges minor, patch, pin, and digest updates for stateless
+application images (cloudflared, Headroom, SearXNG, and Lightpanda) and the Kite
+chart. It groups LiteLLM chart and application image updates into one PR; the
+validation workflow rejects mismatched release versions. Renovate's short-lived
+branches may squash-merge after `static-checks`. Major upgrades, Talos,
+Kubernetes, Cilium, Tailscale, observability charts, storage, and database
+changes remain for review. No automation pushes directly to `main`.
+
+Existing Flux branches created before this workflow must be synchronized once
+with current `main` after the workflow PR merges. Resolve image-line conflicts
+to the newest intended image, and bring the new dispatch-only workflow into
+each branch. Subsequent merge commits keep the branch ancestry aligned.
 
 Before enabling this workflow, configure GitHub branch protection for `main` to
 require pull requests and the infrastructure validation workflow, disallow

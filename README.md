@@ -42,15 +42,15 @@ storage, access, applications, observability, and update automation.
 ## 🔁 How changes reach the cluster
 
 1. A change is proposed against `main` and checked by GitHub Actions.
-2. After review and merge, Flux detects the new Git revision.
+2. After its required checks and merge, Flux detects the new Git revision.
 3. Flux decrypts SOPS resources in-cluster, resolves `dependsOn` ordering, and
    reconciles the declared state.
-4. Renovate proposes ordinary dependency updates separately. Flux exclusively
-   manages portfolio staging, MALG, and Twenty image revisions through their
-   dedicated generated branches. MALG image updates are digest-pinned in the
-   `infrastructure/malg` subtree, open a pull request, and auto-merge only after
-   `static-checks` passes. Other Flux pull requests and all Renovate pull
-   requests remain manual. No automation writes directly to `main`.
+4. Flux opens image PRs for portfolio staging, MALG, and Twenty. Their PRs use
+   merge commits so reused branches retain their history. Renovate opens PRs
+   for other application updates, including LiteLLM and cloudflared. Eligible
+   application updates merge automatically after `static-checks`; platform,
+   database, and major upgrades remain for review. No automation writes
+   directly to `main`.
 
 MALG publishes backend and frontend images as one semantic version, but Flux
 does not use a release metadata file. The deployment checker requires both
