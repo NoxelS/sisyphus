@@ -4,40 +4,75 @@ on:
   push:
     branches:
       - 'flux/**'
-
-permissions:
-  contents: write
-  pull-requests: write
+  workflow_dispatch:
+    inputs:
+      head_branch:
+        description: Flux image branch to process
+        required: true
+        type: string
+      head_sha:
+        description: Commit that triggered the branch push
+        required: true
+        type: string
 
 concurrency:
-  group: flux-image-pr-${{ github.ref_name }}
+  group: flux-image-pr-${{ github.event_name }}-${{ inputs.head_branch || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
-  pull-request:
-    if: startsWith(github.ref, 'refs/heads/flux/')
+  dispatch:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     steps:
-      - name: Open or update pull request
+      - name: Run current main workflow
         env:
           GH_TOKEN: ${{ github.token }}
           HEAD_BRANCH: ${{ github.ref_name }}
         run: |
+          gh workflow run flux-image-pr.yml --repo "$GITHUB_REPOSITORY" --ref main \
+            -f head_branch="$HEAD_BRANCH" -f head_sha="$GITHUB_SHA"
+
+  pull-request:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Open and auto-merge generated image pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_BRANCH: ${{ inputs.head_branch }}
+          HEAD_SHA: ${{ inputs.head_sha }}
+        run: |
           set -euo pipefail
+
+          case "$HEAD_BRANCH" in
+            flux/malg-image|flux/twenty-image|flux/portfolio-staging-image) ;;
+            *) echo "Unexpected Flux branch: $HEAD_BRANCH" >&2; exit 1 ;;
+          esac
+          if ! [[ "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo 'Invalid Flux commit SHA' >&2
+            exit 1
+          fi
+          current_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$HEAD_BRANCH" \
+            --jq '.object.sha')"
+          if [ "$current_sha" != "$HEAD_SHA" ]; then
+            echo "Skipping superseded update for $HEAD_BRANCH"
+            exit 0
+          fi
+
           existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --base main \
             --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number')"
           if [ -n "$existing_pr" ]; then
             pr_number="$existing_pr"
-            echo "Flux image update PR #$pr_number already exists"
           else
-            body='Flux detected a newer managed image. Review the generated manifest
-            change and CI checks before merging.'
+            body='Flux detected a newer managed image. The PR will merge after required checks pass.'
             for attempt in 1 2 3; do
-              if gh pr create \
-                --repo "$GITHUB_REPOSITORY" \
-                --base main \
-                --head "$HEAD_BRANCH" \
-                --title "chore: update Flux-managed images" \
+              if gh pr create --repo "$GITHUB_REPOSITORY" --base main \
+                --head "$HEAD_BRANCH" --title 'chore: update Flux-managed images' \
                 --body "$body"; then
                 break
               fi
@@ -49,8 +84,31 @@ jobs:
             pr_number="$(gh pr list --repo "$GITHUB_REPOSITORY" --base main \
               --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number')"
           fi
-          if [ "$HEAD_BRANCH" = 'flux/malg-image' ]; then
-            # Preserve Flux commits in main when its push branch is reused.
-            gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --auto --merge \
-              --match-head-commit "$GITHUB_SHA"
+          if [ -z "$pr_number" ]; then
+            echo 'Could not locate Flux image update PR' >&2
+            exit 1
           fi
+
+          files="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr_number/files" \
+            --paginate --jq '.[].filename')"
+          if [ -z "$files" ]; then
+            echo 'Flux PR contains no files' >&2
+            exit 1
+          fi
+          while IFS= read -r file; do
+            case "$HEAD_BRANCH:$file" in
+              flux/malg-image:infrastructure/malg/api-deployment.yaml|\
+              flux/malg-image:infrastructure/malg/worker-deployment.yaml|\
+              flux/malg-image:infrastructure/malg/frontend-deployment.yaml|\
+              flux/malg-image:infrastructure/malg/migration-job.yaml|\
+              flux/malg-image:infrastructure/malg/crm-schema/job.yaml|\
+              flux/twenty-image:infrastructure/twenty/server-deployment.yaml|\
+              flux/twenty-image:infrastructure/twenty/worker-deployment.yaml|\
+              flux/portfolio-staging-image:infrastructure/portfolio-staging/deployment.yaml) ;;
+              *) echo "Unexpected Flux PR file: $file" >&2; exit 1 ;;
+            esac
+          done <<< "$files"
+
+          # Flux reuses these branches, so keep their commits in main.
+          gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --auto --merge \
+            --match-head-commit "$HEAD_SHA"

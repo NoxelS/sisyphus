@@ -17,6 +17,12 @@
       "/^clusters\\/sisyphus\\/.+\\.ya?ml$/"
     ]
   },
+  "flux": {
+    "managerFilePatterns": [
+      "/^infrastructure\\/.+\\.ya?ml$/",
+      "/^clusters\\/sisyphus\\/.+\\.ya?ml$/"
+    ]
+  },
   "ignorePaths": [
     "**/*.sops.yaml",
     "clusters/sisyphus/flux-system/gotk-components.yaml",
@@ -27,7 +33,10 @@
     "infrastructure/malg/frontend-deployment.yaml",
     "infrastructure/malg/image-automation.yaml",
     "infrastructure/malg/crm-schema/job.yaml",
-    "infrastructure/malg/migration-job.yaml"
+    "infrastructure/malg/migration-job.yaml",
+    "infrastructure/twenty/server-deployment.yaml",
+    "infrastructure/twenty/worker-deployment.yaml",
+    "infrastructure/twenty/image-automation.yaml"
   ],
   "dependencyDashboard": true,
   "prConcurrentLimit": 5,
@@ -46,6 +55,34 @@
       "matchDatasources": ["docker"],
       "pinDigests": true,
       "labels": ["dependencies", "container"]
+    },
+    {
+      "matchFileNames": [
+        "infrastructure/cloudflare-tunnel/deployment.yaml",
+        "infrastructure/litellm/headroom-deployment.yaml",
+        "infrastructure/malg/searxng-deployment.yaml",
+        "infrastructure/malg/lightpanda-deployment.yaml",
+        "infrastructure/kite/helmrelease.yaml"
+      ],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true,
+      "automergeStrategy": "squash",
+      "labels": ["dependencies", "app-auto-update"]
+    },
+    {
+      "matchFileNames": [
+        "infrastructure/litellm/helmrelease.yaml",
+        "infrastructure/litellm/litellm-ocirepository.yaml"
+      ],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "groupName": "LiteLLM release",
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true,
+      "automergeStrategy": "squash",
+      "labels": ["dependencies", "app-auto-update"]
     }
   ]
 }
