@@ -37,7 +37,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: frontend
-          image: ghcr.io/noxels/malg-frontend:v0.22.0@sha256:ce9b5b042a2ed11e08913c879cc462992a3fa55e977e87bfcfa636b2c27ee317 # {"$imagepolicy": "flux-system:malg-frontend"}
+          image: ghcr.io/noxels/malg-frontend:v0.23.0@sha256:129c9eae33a2909d8f293bc677b7145a447dbaf92c40bcbcd47a2da56fff184a # {"$imagepolicy": "flux-system:malg-frontend"}
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
