@@ -3,7 +3,13 @@ name: Validate infrastructure
 on:
   pull_request:
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'flux/**'
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -22,3 +28,7 @@ jobs:
         run: uv run --no-project --with ruff==0.12.10 ruff check .
       - name: Check SOPS configuration
         run: test -s .sops.yaml
+      - name: Check MALG deployment consistency
+        run: uv run --no-project --with pyyaml python scripts/check_malg_deployment.py
+      - name: Test MALG deployment checker
+        run: uv run --no-project --with pyyaml python -m unittest discover -s tests -p test_malg_deployment.py

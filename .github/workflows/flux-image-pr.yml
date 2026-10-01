@@ -49,13 +49,8 @@ jobs:
             pr_number="$(gh pr list --repo "$GITHUB_REPOSITORY" --base main \
               --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number')"
           fi
-
-          case "$HEAD_BRANCH" in
-            flux/portfolio-staging-image|flux/malg-image|flux/twenty-image)
-              echo "Enabling auto-merge for $HEAD_BRANCH PR #$pr_number"
-              gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --auto --squash
-              ;;
-            *)
-              echo "Leaving $HEAD_BRANCH PR #$pr_number for manual merge"
-              ;;
-          esac
+          if [ "$HEAD_BRANCH" = 'flux/malg-image' ]; then
+            # Preserve Flux commits in main when its push branch is reused.
+            gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --auto --merge \
+              --match-head-commit "$GITHUB_SHA"
+          fi

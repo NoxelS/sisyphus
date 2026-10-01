@@ -21,6 +21,8 @@ kind: ImagePolicy
 metadata:
   name: malg
   namespace: flux-system
+  labels:
+    malg-image-policy: managed
 spec:
   interval: 5m
   imageRepositoryRef:
@@ -38,6 +40,8 @@ kind: ImagePolicy
 metadata:
   name: malg-frontend
   namespace: flux-system
+  labels:
+    malg-image-policy: managed
 spec:
   interval: 5m
   imageRepositoryRef:

@@ -6,6 +6,7 @@ resources:
   - storage.yaml
   - cilium.yaml
   - twenty.yaml
+  - malg-crm-schema.yaml
   - tailscale.yaml
   - tailscale-exit-node.yaml
   - observability.yaml

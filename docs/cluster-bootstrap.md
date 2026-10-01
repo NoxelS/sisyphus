@@ -134,11 +134,20 @@ service `http://frontend.malg.svc.cluster.local:80`. The frontend serves the
 Malg UI and proxies its same-origin `/api/` requests to the cluster-internal
 API service; do not expose the API separately.
 
-Malg image automation scans the API/worker and frontend registries every five
-minutes and opens updates on `flux/malg-image`. Twenty image automation scans
-stable v2 releases and opens updates on `flux/twenty-image`. GitHub enables
-auto-merge for those branches after the required pull-request checks pass, so
-do not merge them directly or bypass branch protection.
+MALG image automation scans the API/worker and frontend registries every five
+minutes and narrows its setters to `infrastructure/malg`. It opens a reviewed
+update on `flux/malg-image`; the PR is MALG-only and auto-merges only after
+`static-checks` passes with a matching head commit. The generated branch is
+deleted after merge so the next update starts from current `main`; no workflow
+commits manifests or resets branches.
+
+MALG backend and frontend images are immutable digest-pinned artifacts sharing
+one semantic tag. The deployment checker rejects mixed tags, missing workloads,
+release metadata, and unsafe migration settings. The migration Job runs
+`alembic upgrade head` using the bundled image migration graph, while API and
+worker startup waits for that schema. Its force annotation and the CRM schema
+Kustomization's `force: true` rerun Jobs for changed images. Runtime CRM
+contract compatibility checks remain in place during rolling updates.
 
 The dashboard-managed tunnel should map `ai.noel.fyi` to
 `http://litellm.litellm.svc.cluster.local:4000`. Only the proxy port belongs on
@@ -368,15 +377,14 @@ GitHub Actions, and Python tooling. Renovate must not receive cluster
 credentials or SOPS private keys. Major upgrades remain manually approved from
 the Renovate Dependency Dashboard; generated Flux manifests and encrypted
 secret files are excluded.
-
 Flux remains the deployment source of truth. Renovate manages ordinary
 dependency updates, while Flux exclusively manages portfolio staging, Malg, and
 Twenty image revisions through `flux/portfolio-staging-image`,
 `flux/malg-image`, and `flux/twenty-image`, respectively. GitHub Actions opens
-or updates review pull requests from those branches into `main` and enables
-auto-merge only for those three branches after required checks pass. Other
-update pull requests remain manual. Do not change any automation to push
-directly to `main`.
+or updates review pull requests from those branches into `main`; only the MALG
+image/release-tuple branch requests auto-merge after `static-checks` passes.
+Other Flux and Renovate pull requests remain manual. Do not change any
+automation to push directly to `main`.
 
 Before enabling this workflow, configure GitHub branch protection for `main` to
 require pull requests and the infrastructure validation workflow, disallow

@@ -38,7 +38,16 @@ spec:
         - name: lightpanda
           image: lightpanda/browser:0.4.1@sha256:73f67d2dc0bc243f3a8c87065c9871c98b121197baf7b650df5da91b33b98f02
           imagePullPolicy: IfNotPresent
-          command: ["/bin/lightpanda", "mcp", "--host", "0.0.0.0", "--port", "9223"]
+          command:
+            - /bin/lightpanda
+            - mcp
+            - --host
+            - 0.0.0.0
+            - --port
+            - "9223"
+            - --block-private-networks
+            - --block-urls
+            - "*linkedin.com*,*lnkd.in*"
           env:
             - name: HOME
               value: /tmp

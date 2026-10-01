@@ -46,11 +46,20 @@ storage, access, applications, observability, and update automation.
 3. Flux decrypts SOPS resources in-cluster, resolves `dependsOn` ordering, and
    reconciles the declared state.
 4. Renovate proposes ordinary dependency updates separately. Flux exclusively
-   manages portfolio staging, Malg, and Twenty image revisions through
-   `flux/portfolio-staging-image`, `flux/malg-image`, and `flux/twenty-image`,
-   respectively; each branch opens a review pull request, and GitHub enables
-   auto-merge for only those three branches after required checks pass. Other
-   update pull requests remain manual and no branch deploys directly to `main`.
+   manages portfolio staging, MALG, and Twenty image revisions through their
+   dedicated generated branches. MALG image updates are digest-pinned in the
+   `infrastructure/malg` subtree, open a pull request, and auto-merge only after
+   `static-checks` passes. Other Flux pull requests and all Renovate pull
+   requests remain manual. No automation writes directly to `main`.
+
+MALG publishes backend and frontend images as one semantic version, but Flux
+does not use a release metadata file. The deployment checker requires both
+repositories to use the same immutable tag, while each image keeps its own
+digest. The migration Job runs `alembic upgrade head` from the image's bundled
+Alembic graph; API and worker processes wait for that same schema before
+starting. Migration and CRM schema Jobs retain their force annotations so a
+new image reruns them. Runtime CRM contract compatibility checks remain active
+during rolling updates.
 
 Normal Kubernetes resources belong in Git. Manual installation is reserved for
 the documented Talos, Cilium, and Flux bootstrap boundary.

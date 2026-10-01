@@ -12,3 +12,6 @@ data:
   MALG_LLM__MAX_RETRIES: "3"
   MALG_SEARCH__URL: http://searxng:8080
   MALG_AUTH__USERNAME: admin
+  MALG_TWENTY__BASE_URL: http://twenty.twenty.svc.cluster.local:3000
+  MALG_TWENTY__PUBLIC_URL: https://twenty.noel.fyi
+  MALG_TWENTY__WORKSPACE_ID: 25090e5d-6d7b-417c-addf-031270484608
