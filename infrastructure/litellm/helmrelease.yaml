@@ -5,6 +5,7 @@ metadata:
   namespace: litellm
 spec:
   interval: 30m
+  timeout: 20m
   dependsOn:
     - name: postgresql
     - name: redis
@@ -126,7 +127,9 @@ spec:
     resources:
       requests:
         cpu: "1"
-        memory: 4Gi
+        # Keep steady-state reservation below the 4Gi limit so hook Jobs can
+        # schedule alongside the proxy on the single node.
+        memory: 2Gi
       limits:
         cpu: "1"
         memory: 4Gi
@@ -154,7 +157,10 @@ spec:
       resources:
         requests:
           cpu: "1"
-          memory: 2Gi
+          # This pre-upgrade hook schedules before the proxy's new request is
+          # applied. Keep the request within existing node headroom while the
+          # 4Gi limit preserves the memory ceiling required by migrations.
+          memory: 1Gi
         limits:
           cpu: "1"
           memory: 4Gi

@@ -24,10 +24,6 @@ spec:
       name: "*"
     - kind: OCIRepository
       name: "*"
-    - kind: HelmRelease
-      name: "*"
-    - kind: Kustomization
-      name: "*"
     - kind: ImageRepository
       name: "*"
     - kind: ImagePolicy
