@@ -8,3 +8,4 @@ spec:
   url: oci://registry-1.docker.io/bitnamicharts/redis
   ref:
     tag: 28.0.15
+    digest: sha256:0c2e262d4805e78815f3cbd6562eaa84868f079384a74e54dd7b055fa8fb88c2

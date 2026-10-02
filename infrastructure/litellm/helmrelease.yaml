@@ -5,6 +5,7 @@ metadata:
   namespace: litellm
 spec:
   interval: 30m
+  timeout: 20m
   dependsOn:
     - name: postgresql
     - name: redis
@@ -25,7 +26,7 @@ spec:
     numWorkers: 1
     image:
       repository: ghcr.io/berriai/litellm
-      tag: v1.100.0@sha256:c8756e7b9a61fe45df2ccb5b781d388c3b2f3a21ef9e4956630caef20f9f03aa
+      tag: v1.103.2@sha256:f63fb81b831b170ec16851e23c36ac5bf52ef106b271406429524a2ed730bbfd
       pullPolicy: IfNotPresent
     serviceAccount:
       create: true
@@ -126,7 +127,9 @@ spec:
     resources:
       requests:
         cpu: "1"
-        memory: 4Gi
+        # Keep steady-state reservation below the 4Gi limit so hook Jobs can
+        # schedule alongside the proxy on the single node.
+        memory: 2Gi
       limits:
         cpu: "1"
         memory: 4Gi
@@ -154,7 +157,10 @@ spec:
       resources:
         requests:
           cpu: "1"
-          memory: 2Gi
+          # This pre-upgrade hook schedules before the proxy's new request is
+          # applied. Keep the request within existing node headroom while the
+          # 4Gi limit preserves the memory ceiling required by migrations.
+          memory: 1Gi
         limits:
           cpu: "1"
           memory: 4Gi

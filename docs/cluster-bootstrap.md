@@ -391,10 +391,11 @@ branches may squash-merge after `static-checks`. Major upgrades, Talos,
 Kubernetes, Cilium, Tailscale, observability charts, storage, and database
 changes remain for review. No automation pushes directly to `main`.
 
-Existing Flux branches created before this workflow must be synchronized once
-with current `main` after the workflow PR merges. Resolve image-line conflicts
-to the newest intended image, and bring the new dispatch-only workflow into
-each branch. Subsequent merge commits keep the branch ancestry aligned.
+The three existing Flux branches were aligned to `main` on 2026-10-01 after
+verifying their generated image manifests had no unmerged changes. If an older
+branch is restored, verify its image changes and synchronize it with current
+`main` before the next Flux push. Subsequent merge commits keep its ancestry
+aligned.
 
 Before enabling this workflow, configure GitHub branch protection for `main` to
 require pull requests and the infrastructure validation workflow, disallow

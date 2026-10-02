@@ -8,7 +8,7 @@ spec:
   path: ./infrastructure/litellm
   prune: true
   wait: true
-  timeout: 20m
+  timeout: 25m
   dependsOn:
     - name: storage
     - name: cilium
