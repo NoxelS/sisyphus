@@ -30,7 +30,9 @@ jobs:
         run: test -s .sops.yaml
       - name: Check MALG deployment consistency
         run: uv run --no-project --with pyyaml python scripts/check_malg_deployment.py
-      - name: Check LiteLLM chart and image version
+      - name: Check LiteLLM deployment safety
         run: uv run --no-project --with pyyaml python scripts/check_litellm_release.py
-      - name: Test MALG deployment checker
-        run: uv run --no-project --with pyyaml python -m unittest discover -s tests -p test_malg_deployment.py
+      - name: Check Flux alerting safety
+        run: uv run --no-project --with pyyaml python scripts/check_flux_alerting.py
+      - name: Test deployment checkers
+        run: uv run --no-project --with pyyaml python -m unittest discover -s tests -p 'test_*.py'
