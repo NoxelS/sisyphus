@@ -37,7 +37,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: worker
-          image: ghcr.io/noxels/malg:v0.27.0@sha256:f7829d0e539bc84b7a5955c87fb180469629ea43cf71af712b102430b0d8ec28 # {"$imagepolicy": "flux-system:malg"}
+          image: ghcr.io/noxels/malg:v0.30.0@sha256:f56786520ed4859aa358a8a61ca0641dfdee804688f078a67cde8a69d1e46aed # {"$imagepolicy": "flux-system:malg"}
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "-c", "python -m malg.database.wait_for_schema --timeout-seconds 300 && exec python -m malg.worker"]
           envFrom:
