@@ -3,6 +3,7 @@ name: Open Flux image update PR
 on:
   push:
     branches:
+      - main
       - 'flux/**'
   workflow_dispatch:
     inputs:
@@ -17,13 +18,17 @@ on:
 
 concurrency:
   group: flux-image-pr-${{ github.event_name }}-${{ inputs.head_branch || github.ref_name }}
-  cancel-in-progress: true
+  # App-authenticated branch updates trigger another push; finish the current run.
+  cancel-in-progress: false
+  queue: max
 
 jobs:
   dispatch:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
+      contents: read
       actions: write
     steps:
       - name: Run current main workflow
@@ -31,19 +36,45 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           HEAD_BRANCH: ${{ github.ref_name }}
         run: |
-          gh workflow run flux-image-pr.yml --repo "$GITHUB_REPOSITORY" --ref main \
-            -f head_branch="$HEAD_BRANCH" -f head_sha="$GITHUB_SHA"
+          set -euo pipefail
+          if [ "$HEAD_BRANCH" = main ]; then
+            # A merge can leave another image PR behind strict branch protection.
+            for branch in flux/malg-image flux/twenty-image flux/portfolio-staging-image; do
+              ahead_by="$(gh api "repos/$GITHUB_REPOSITORY/compare/main...$branch" \
+                --jq '.ahead_by')"
+              if [ "$ahead_by" -eq 0 ]; then
+                continue
+              fi
+              sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$branch" \
+                --jq '.object.sha')"
+              gh workflow run flux-image-pr.yml --repo "$GITHUB_REPOSITORY" --ref main \
+                -f head_branch="$branch" -f head_sha="$sha"
+            done
+          else
+            gh workflow run flux-image-pr.yml --repo "$GITHUB_REPOSITORY" --ref main \
+              -f head_branch="$HEAD_BRANCH" -f head_sha="$GITHUB_SHA"
+          fi
 
   pull-request:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
     steps:
+      - name: Create repository-scoped Flux App token
+        id: flux-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.FLUX_APP_CLIENT_ID }}
+          private-key: ${{ secrets.FLUX_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+          permission-pull-requests: write
       - name: Open and auto-merge generated image pull request
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.flux-token.outputs.token }}
           HEAD_BRANCH: ${{ inputs.head_branch }}
           HEAD_SHA: ${{ inputs.head_sha }}
         run: |
