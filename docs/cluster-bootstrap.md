@@ -180,7 +180,7 @@ LiteLLM proxy worker, a standalone PostgreSQL database, standalone Redis,
 Headroom, and the Solheim-backed `qwen3.8-27b` chat model. The model routes
 OpenAI-compatible chat requests to Solheim over HTTPS and reads
 `SOLHEIM_API_KEY` from the `litellm-runtime` Secret. Its LiteLLM metadata
-advertises a 262,144-token context window and permits up to three concurrent
+advertises a 262,144-token context window and permits up to twelve concurrent
 upstream requests. LiteLLM stores model records and records estimated request
 spend using Alibaba Cloud Model Studio's international Qwen3.8-27B on-demand
 benchmark: $0.50 per million input tokens and $3.00 per million output tokens.

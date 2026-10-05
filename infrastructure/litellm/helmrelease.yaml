@@ -69,7 +69,7 @@ spec:
             model: openai/qwen3.8-27b
             api_base: https://api.solheim.ai/v1
             api_key: os.environ/SOLHEIM_API_KEY
-            max_parallel_requests: 3
+            max_parallel_requests: 12
             # Comparable on-demand benchmark: Alibaba Cloud Model Studio
             # international Qwen3.8-27B pricing ($0.50/$3.00 per 1M tokens).
             # Solheim bills this endpoint as a flat-rate subscription.
