@@ -39,14 +39,21 @@ jobs:
           set -euo pipefail
           if [ "$HEAD_BRANCH" = main ]; then
             # A merge can leave another image PR behind strict branch protection.
+            # Merged branches may have been automatically deleted by GitHub.
+            refs="$(gh api "repos/$GITHUB_REPOSITORY/git/matching-refs/heads/flux/")"
             for branch in flux/malg-image flux/twenty-image flux/portfolio-staging-image; do
-              ahead_by="$(gh api "repos/$GITHUB_REPOSITORY/compare/main...$branch" \
+              sha="$(jq -r --arg ref "refs/heads/$branch" \
+                '.[] | select(.ref == $ref) | .object.sha' <<< "$refs")"
+              if [ -z "$sha" ]; then
+                echo "Skipping missing Flux branch: $branch"
+                continue
+              fi
+              # Compare the captured commit even if the branch is deleted meanwhile.
+              ahead_by="$(gh api "repos/$GITHUB_REPOSITORY/compare/main...$sha" \
                 --jq '.ahead_by')"
               if [ "$ahead_by" -eq 0 ]; then
                 continue
               fi
-              sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$branch" \
-                --jq '.object.sha')"
               gh workflow run flux-image-pr.yml --repo "$GITHUB_REPOSITORY" --ref main \
                 -f head_branch="$branch" -f head_sha="$sha"
             done
@@ -88,13 +95,18 @@ jobs:
             echo 'Invalid Flux commit SHA' >&2
             exit 1
           fi
-          current_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$HEAD_BRANCH" \
-            --jq '.object.sha')"
+          refs="$(gh api "repos/$GITHUB_REPOSITORY/git/matching-refs/heads/flux/")"
+          current_sha="$(jq -r --arg ref "refs/heads/$HEAD_BRANCH" \
+            '.[] | select(.ref == $ref) | .object.sha' <<< "$refs")"
+          if [ -z "$current_sha" ]; then
+            echo "Skipping missing Flux branch: $HEAD_BRANCH"
+            exit 0
+          fi
           if [ "$current_sha" != "$HEAD_SHA" ]; then
             echo "Skipping superseded update for $HEAD_BRANCH"
             exit 0
           fi
-          comparison="$(gh api "repos/$GITHUB_REPOSITORY/compare/main...$HEAD_BRANCH" \
+          comparison="$(gh api "repos/$GITHUB_REPOSITORY/compare/main...$current_sha" \
             --jq '{ahead_by,behind_by}')"
           ahead_by="$(jq -r '.ahead_by' <<< "$comparison")"
           if [ "$ahead_by" -eq 0 ]; then
