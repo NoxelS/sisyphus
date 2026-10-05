@@ -30,7 +30,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: database-ready
-          image: ghcr.io/noxels/malg:v0.31.0@sha256:6b960fa93e07ad6b69b748073dfdc2e1a3c6b970eb007013b5281a116b51b89c # {"$imagepolicy": "flux-system:malg"}
+          image: ghcr.io/noxels/malg:v0.32.0@sha256:251e8f3209e9e27fef42126137a52825743460b80d0b328a4c6af66d9df6f196 # {"$imagepolicy": "flux-system:malg"}
           command:
             - python
             - -c
@@ -75,7 +75,7 @@ spec:
               mountPath: /tmp
       containers:
         - name: migration
-          image: ghcr.io/noxels/malg:v0.31.0@sha256:6b960fa93e07ad6b69b748073dfdc2e1a3c6b970eb007013b5281a116b51b89c # {"$imagepolicy": "flux-system:malg"}
+          image: ghcr.io/noxels/malg:v0.32.0@sha256:251e8f3209e9e27fef42126137a52825743460b80d0b328a4c6af66d9df6f196 # {"$imagepolicy": "flux-system:malg"}
           command: ["alembic", "upgrade", "head"]
           env:
             - name: POSTGRES_USER
