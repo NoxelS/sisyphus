@@ -381,7 +381,41 @@ The generated branches dispatch PR handling to the workflow on current `main`.
 That workflow allows only the expected image manifest files and requests merge
 commits for all three branches. It merges current `main` into a generated
 branch when needed so required checks run against an up-to-date base. The
-required `static-checks` gate controls their merges.
+required `static-checks` gate controls their merges. Each push to `main` also
+rechecks pending image branches, so merging one PR cannot leave another waiting
+for a manual branch update.
+
+### Flux PR GitHub App
+
+PR creation, branch updates, and auto-merge use a dedicated GitHub App token.
+The built-in `GITHUB_TOKEN` causes PR validation to require manual workflow
+approval, independently of the first-time-contributor policy.
+
+One-time setup:
+
+1. Register a private GitHub App on `NoxelS`, with webhooks disabled and only
+   repository **Contents: read and write**, **Pull requests: read and write**,
+   and the mandatory **Metadata: read** permission.
+2. Install it on **only `NoxelS/sisyphus`**. Do not grant branch-protection bypass.
+3. Set the Sisyphus Actions variable `FLUX_APP_CLIENT_ID` to its Client ID.
+4. Generate an App private key and store it as the Sisyphus Actions secret
+   `FLUX_APP_PRIVATE_KEY`. Transfer the downloaded PEM through standard input,
+   for example `gh secret set FLUX_APP_PRIVATE_KEY --repo NoxelS/sisyphus < /path/to/key.pem`.
+   Keep keys out of Git, command arguments, terminal output, and chat.
+
+The workflow mints a short-lived token restricted to this repository and revokes
+it when the job finishes. It never checks out PR code with the App credential.
+Only the `main` workflow handles PRs; Flux pushes dispatch to that version.
+App-authenticated updates can trigger workflows themselves, so PR handling is
+serialized per branch without cancelling an in-progress branch update.
+
+After setup, merge the workflow change and verify a new MALG image PR runs
+`static-checks` without approval, auto-merges, and reaches Ready in Flux with
+the matching backend and frontend version. An already approval-blocked run may
+still need a one-time approval or a fresh App-authenticated branch update.
+A successful image publication alone does not establish deployment success.
+To rotate the key, replace the Actions secret before revoking the old App key;
+removing the installation or secret stops unattended PR management.
 
 Renovate auto-merges minor, patch, pin, and digest updates for stateless
 application images (cloudflared, Headroom, SearXNG, and Lightpanda) and the Kite
