@@ -96,7 +96,8 @@ stay in upstream Laya. Workspace arenas and memory-pattern caching are disabled
 to avoid retaining large allocations after a long request. Two requests may be
 admitted (one running, one waiting); excess requests receive 503 with
 `Retry-After: 1`. The chat route also has a LiteLLM concurrency limit of two,
-which may reject excess requests with 429 before they reach Laya. Two admissions are not two parallel inferences. Sustained
+which may reject excess requests with 429 before they reach Laya. Two admissions
+are not two parallel inferences. Sustained
 throughput is approximately the reciprocal of measured service time; a queued
 request adds the preceding request's service time. Measure on Sisyphus before
 relying on a latency or throughput SLO. CI timing describes its hosted runner.
@@ -110,10 +111,10 @@ avoid a second resident model and cause a brief outage.
 
 The validated AMD64 hosted-runner test used the same two-CPU/2-GiB limits and
 an internal network with no egress. With four questions, 20 long choice labels
-each and 512-token overrides, 10 sequential requests measured 12.95 seconds
-median and 13.28 seconds maximum. A four-client burst returned two 200s
-(at 12.92 and 25.83 seconds) and two immediate 503s. Service peak RSS was
-1,089 MiB and final RSS 1,041 MiB; the earlier two-choice stress run peaked at
+each and 512-token overrides, the adapter image's 10 sequential requests measured 13.69 seconds median and
+13.75 seconds maximum. A four-client burst returned two 200s
+(at 13.81 and 27.51 seconds) and two immediate 503s. Service peak RSS was
+1,037 MiB and final RSS 946 MiB; the earlier two-choice stress run peaked at
 1,135 MiB. CI rejects peak RSS above the 1,152-MiB request. These are smoke-test
 observations, not a production latency percentile or memory guarantee.
 
@@ -148,7 +149,7 @@ latency/RSS are reported, not inferred from the model's size.
 
 The paired October 6 validation achieved 84.4% FP32 accuracy and 84.8% INT8
 accuracy (422 and 424 correct out of 500), with 99.2% decision agreement
-(496/500). Mean absolute probability drift was 0.003391; maximum drift was
+(496/500). Mean absolute probability drift was 0.0033914; maximum drift was
 0.0876. Quantization reduced initializer storage from 1,685,175,801 to
 640,598,201 bytes, with 122 quantized MatMul operators.
 
