@@ -1,0 +1,84 @@
+name: Build Laya English INT8
+
+on:
+  push:
+    branches: [main, 'feat/**']
+    paths: ['containers/laya/**', '.github/workflows/laya-image.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: laya-image-${{ github.ref }}
+  # Let expensive export/evaluation finish and populate the build cache.
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v3
+      - name: Build and compare INT8 against FP32
+        uses: docker/build-push-action@v6
+        with:
+          context: containers/laya
+          load: true
+          tags: laya:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Test offline runtime with production limits
+        run: |
+          docker network create --internal laya-test
+          docker run -d --name laya-test --network laya-test \
+            --network-alias laya.litellm.svc.cluster.local --read-only \
+            --tmpfs /tmp:rw,noexec,nosuid,size=64m --cap-drop ALL \
+            --security-opt no-new-privileges --cpus 2 --memory 2g \
+            -v "$PWD/containers/laya/smoke.py:/app/smoke.py:ro" \
+            -e LAYA_API_KEY=smoke-key laya:test
+          docker cp laya-test:/opt/laya/validation.json validation.json
+          docker exec laya-test python /app/smoke.py
+          docker exec laya-test cat /tmp/runtime-validation.json > runtime-validation.json
+          docker stats --no-stream laya-test
+          cat validation.json
+      - name: Verify the production LiteLLM route
+        run: |
+          # Generate inside the image, then copy from a named configuration container.
+          docker create --name proxy-config --entrypoint python \
+            -v "$PWD/infrastructure/litellm/helmrelease.yaml:/tmp/helmrelease.yaml:ro" \
+            -v "$PWD/containers/laya/proxy_smoke.py:/tmp/proxy_smoke.py:ro" \
+            ghcr.io/berriai/litellm:v1.104.0 /tmp/proxy_smoke.py config
+          docker start -a proxy-config
+          docker cp proxy-config:/tmp/proxy.yaml proxy.yaml
+          docker run -d --name proxy-test --network laya-test \
+            -e LAYA_API_KEY=smoke-key -v "$PWD/proxy.yaml:/tmp/proxy.yaml:ro" \
+            -v "$PWD/containers/laya/proxy_smoke.py:/tmp/proxy_smoke.py:ro" \
+            ghcr.io/berriai/litellm:v1.104.0 --config /tmp/proxy.yaml --port 4000
+          docker exec proxy-test python /tmp/proxy_smoke.py test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: laya-quantization-validation
+          path: |
+            validation.json
+            runtime-validation.json
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish validated image
+        run: |
+          docker tag laya:test ghcr.io/noxels/sisyphus-laya-english:sha-${{ github.sha }}
+          docker push ghcr.io/noxels/sisyphus-laya-english:sha-${{ github.sha }}
+      - name: Diagnostics
+        if: always()
+        run: |
+          docker inspect --format 'OOMKilled={{.State.OOMKilled}} ExitCode={{.State.ExitCode}}' laya-test || true
+          docker logs laya-test 2>&1 || true
+          docker stats --no-stream laya-test || true
+          docker logs proxy-test 2>&1 || true

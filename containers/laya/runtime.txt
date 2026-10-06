@@ -1,0 +1,5 @@
+laya==0.3.28
+transformers==5.18.0
+onnxruntime==1.30.0
+fastapi==0.142.2
+uvicorn==0.54.0
