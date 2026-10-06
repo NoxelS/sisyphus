@@ -12,7 +12,8 @@ permissions:
 
 concurrency:
   group: laya-image-${{ github.ref }}
-  cancel-in-progress: true
+  # Let expensive export/evaluation finish and populate the build cache.
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -31,16 +32,38 @@ jobs:
           cache-to: type=gha,mode=max
       - name: Test offline runtime with production limits
         run: |
-          docker run -d --name laya-test --network none --read-only --tmpfs /tmp:rw,noexec,nosuid,size=64m --cap-drop ALL --security-opt no-new-privileges --cpus 2 --memory 2g -e LAYA_API_KEY=smoke-key laya:test
+          docker network create --internal laya-test
+          docker run -d --name laya-test --network laya-test \
+            --network-alias laya.litellm.svc.cluster.local --read-only \
+            --tmpfs /tmp:rw,noexec,nosuid,size=64m --cap-drop ALL \
+            --security-opt no-new-privileges --cpus 2 --memory 2g \
+            -e LAYA_API_KEY=smoke-key laya:test
           docker cp containers/laya/smoke.py laya-test:/tmp/smoke.py
           docker exec laya-test python /tmp/smoke.py
           docker cp laya-test:/opt/laya/validation.json validation.json
+          docker cp laya-test:/tmp/runtime-validation.json runtime-validation.json
           docker stats --no-stream laya-test
           cat validation.json
+      - name: Verify the production LiteLLM route
+        run: |
+          # Generate inside the image, then copy from a named configuration container.
+          docker create --name proxy-config --entrypoint python \
+            -v "$PWD/infrastructure/litellm/helmrelease.yaml:/tmp/helmrelease.yaml:ro" \
+            -v "$PWD/containers/laya/proxy_smoke.py:/tmp/proxy_smoke.py:ro" \
+            ghcr.io/berriai/litellm:v1.104.0 /tmp/proxy_smoke.py config
+          docker start -a proxy-config
+          docker cp proxy-config:/tmp/proxy.yaml proxy.yaml
+          docker run -d --name proxy-test --network laya-test \
+            -e LAYA_API_KEY=smoke-key -v "$PWD/proxy.yaml:/tmp/proxy.yaml:ro" \
+            -v "$PWD/containers/laya/proxy_smoke.py:/tmp/proxy_smoke.py:ro" \
+            ghcr.io/berriai/litellm:v1.104.0 --config /tmp/proxy.yaml --port 4000
+          docker exec proxy-test python /tmp/proxy_smoke.py test
       - uses: actions/upload-artifact@v4
         with:
           name: laya-quantization-validation
-          path: validation.json
+          path: |
+            validation.json
+            runtime-validation.json
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:

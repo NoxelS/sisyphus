@@ -18,6 +18,8 @@ RUN python build_model.py download \
     && python build_model.py clean
 
 FROM runtime AS service
+LABEL org.opencontainers.image.source="https://github.com/NoxelS/sisyphus" \
+    org.opencontainers.image.description="Laya English 421M weight-only INT8 decision service"
 COPY --from=builder /opt/laya /opt/laya
 ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_HOME=/tmp/huggingface \
     LAYA_DEVICE=cpu LAYA_THREADS=2 LAYA_MAX_CONCURRENT=2 \
