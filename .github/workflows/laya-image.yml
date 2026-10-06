@@ -39,9 +39,9 @@ jobs:
             --security-opt no-new-privileges --cpus 2 --memory 2g \
             -v "$PWD/containers/laya/smoke.py:/app/smoke.py:ro" \
             -e LAYA_API_KEY=smoke-key laya:test
-          docker exec laya-test python /app/smoke.py
           docker cp laya-test:/opt/laya/validation.json validation.json
-          docker cp laya-test:/tmp/runtime-validation.json runtime-validation.json
+          docker exec laya-test python /app/smoke.py
+          docker exec laya-test cat /tmp/runtime-validation.json > runtime-validation.json
           docker stats --no-stream laya-test
           cat validation.json
       - name: Verify the production LiteLLM route
@@ -59,6 +59,7 @@ jobs:
             ghcr.io/berriai/litellm:v1.104.0 --config /tmp/proxy.yaml --port 4000
           docker exec proxy-test python /tmp/proxy_smoke.py test
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: laya-quantization-validation
           path: |
