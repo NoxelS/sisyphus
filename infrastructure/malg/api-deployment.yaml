@@ -21,6 +21,8 @@ spec:
       app.kubernetes.io/instance: malg-api
   template:
     metadata:
+      annotations:
+        malg.noel.fyi/search-endpoint: "http://searxng-tor:8080"
       labels:
         app.kubernetes.io/name: api
         app.kubernetes.io/instance: malg-api

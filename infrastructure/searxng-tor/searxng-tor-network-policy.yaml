@@ -12,6 +12,15 @@ spec:
     - fromEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: malg
+            k8s:app.kubernetes.io/name: worker
+            k8s:app.kubernetes.io/instance: malg-worker
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: malg
             k8s:app.kubernetes.io/name: searxng-evaluation
             k8s:app.kubernetes.io/instance: searxng-evaluation
       toPorts:
