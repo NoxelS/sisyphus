@@ -162,15 +162,6 @@ spec:
         - ports:
             - port: "8080"
               protocol: TCP
-    - toEndpoints:
-        - matchLabels:
-            k8s:io.kubernetes.pod.namespace: malg
-            k8s:app.kubernetes.io/name: searxng
-            k8s:app.kubernetes.io/instance: searxng-tor
-      toPorts:
-        - ports:
-            - port: "8080"
-              protocol: TCP
     - toEntities:
         - world
       toPorts:

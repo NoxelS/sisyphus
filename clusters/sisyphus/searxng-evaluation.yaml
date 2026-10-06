@@ -1,0 +1,18 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: searxng-evaluation
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./infrastructure/searxng-evaluation
+  # Enable only after runtime network verification and workload review.
+  suspend: true
+  prune: true
+  wait: true
+  timeout: 125m
+  dependsOn:
+    - name: searxng-tor
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

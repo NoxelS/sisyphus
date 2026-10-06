@@ -61,3 +61,12 @@ spec:
             periodSeconds: 15
             timeoutSeconds: 5
             failureThreshold: 3
+          volumeMounts:
+            - name: tor-config
+              mountPath: /etc/tor/torrc
+              subPath: torrc
+              readOnly: true
+      volumes:
+        - name: tor-config
+          configMap:
+            name: torproxy-config
