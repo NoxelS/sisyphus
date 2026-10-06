@@ -14,4 +14,6 @@ resources:
   - kite.yaml
   - litellm.yaml
   - malg.yaml
+  - searxng-tor.yaml
+  - searxng-evaluation.yaml
   - portfolio-staging.yaml

@@ -1,0 +1,55 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: searxng-evaluation-001
+  namespace: malg
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 7200
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: searxng-evaluation
+        app.kubernetes.io/instance: searxng-evaluation
+        app.kubernetes.io/part-of: malg
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: evaluate
+          # Reuse the pinned Tor image's Python standard library.
+          image: docker.io/hapheus/torproxy:v1.0.0@sha256:a02bb48b6e599649c94e1ecd515359f0d9f04f23ea842d585ed28fdd08168fe7
+          command: ["python3", "-u", "/evaluation/evaluate.py"]
+          env:
+            - name: MALG_SEARCH__URL
+              value: http://searxng-tor.malg.svc.cluster.local.:8080
+            - name: DIRECT_SEARCH_URL
+              value: http://searxng.malg.svc.cluster.local.:8080
+            - name: EVALUATION_REPEATS
+              value: "10"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          volumeMounts:
+            - name: evaluation
+              mountPath: /evaluation
+              readOnly: true
+      volumes:
+        - name: evaluation
+          configMap:
+            name: searxng-evaluation

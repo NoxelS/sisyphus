@@ -1,0 +1,91 @@
+# Tor-backed SearXNG experiment
+
+The MALG namespace contains an optional `searxng-tor` service alongside the
+existing direct `searxng` service. The experimental instance uses SearXNG's
+`socks5h` outgoing proxy setting so engine hostnames are resolved by Tor. The
+existing `searxng` deployment and endpoint remain the default.
+
+Flux reconciles the services through the independent `searxng-tor`
+Kustomization, which depends on MALG for its namespace and shared SearXNG
+secret. Production MALG has no dependency on the experiment. Tor outages
+therefore affect experimental readiness without failing MALG's health checks.
+
+## Network boundaries
+
+- Only the evaluation Job can call `searxng-tor:8080`; there is no public or
+  cross-namespace route.
+- The Tor-backed SearXNG pod can egress only to the Tor SOCKS service on TCP
+  9050 and to CoreDNS for the exact `tor-socks.malg.svc.cluster.local.` name.
+  Direct HTTP/HTTPS egress and arbitrary DNS queries are denied by Cilium.
+- The Tor proxy accepts SOCKS connections only from the Tor-backed SearXNG
+  pod. Its egress is limited to TCP 443 and 9001, the common Tor relay ORPorts.
+  `ReachableAddresses` in the mounted `torrc` tells Tor to select reachable
+  guards and directory connections within that same allowlist. Relays using
+  other ORPorts are excluded. Kustomize hashes the Tor ConfigMap so changes
+  roll out a new proxy pod.
+- Tor bootstrap readiness gates the proxy pod's readiness. If Tor is
+  unavailable, the SOCKS endpoint is not ready and SearXNG has no direct
+  network path to fall back to.
+
+## Evaluation and rollback
+
+For the comparison tracked in [MALG issue #55](https://github.com/NoxelS/malg/issues/55),
+use the dedicated `searxng-evaluation` Flux Kustomization. It is suspended by
+default, so merging this deployment does not start searches. Its finite Job
+calls both endpoints with the same queries, alternating their order. It has
+its own explicit `MALG_SEARCH__URL`, no production runtime ConfigMap or
+credentials, and no access to the MALG job queue. The four production workers
+continue using the direct endpoint.
+
+1. Complete the runtime network checks below. Agree on representative,
+   non-sensitive queries with MALG and replace
+   `infrastructure/searxng-evaluation/queries.txt`. The provided queries are
+   examples, not a validated research cohort.
+2. Review `EVALUATION_REPEATS` in `job.yaml`. Five queries repeated ten times
+   produce 50 requests per endpoint, 100 total. The runner rejects workloads
+   above 200 total requests, sends requests serially with a five-second gap,
+   and never retries or substitutes the direct endpoint for a failed Tor
+   request. The Job has a two-hour deadline and no restart retries. Avoid
+   multiple runs exceeding the agreed daily budget.
+3. Commit a unique Job name for every run or workload change (initially
+   `searxng-evaluation-001`) and set `spec.suspend: false` in
+   `clusters/sisyphus/searxng-evaluation.yaml`. Flux creates the Job after
+   `searxng-tor` is ready. A new name avoids immutable Job template updates.
+4. Save the Job's JSON-lines logs before another run: for example,
+   `kubectl -n malg logs job/searxng-evaluation-001`. Logs include endpoint
+   URLs, workload hash, query index, result counts, latency, and engine errors.
+   They omit query text and result content. Compare these measurements with
+   MALG's normalization and research outcomes separately; this Job measures
+   search responses, not full account-research quality.
+5. After completion, commit `spec.suspend: true` on the evaluation Flux
+   Kustomization. Completed Jobs remain available for log collection and do
+   not run again on ordinary reconciliations. Suspension prevents subsequent
+   source changes from starting another run; it does not stop an active Job.
+
+To stop an active evaluation, remove `searxng-evaluation.yaml` from
+`clusters/sisyphus/kustomization.yaml`; Flux prunes that Kustomization and its
+Job and policies. To remove the entire experiment, also remove
+`searxng-tor.yaml` from that root. Flux prunes the Tor services and deployments.
+Archive evaluation logs before removal. No production worker configuration
+needs restoring. All workloads still share the single node and the direct
+comparison adds bounded load to the existing search service.
+
+Tor can be slower or less available, does not guarantee fewer CAPTCHAs or
+anonymity, and destination services still receive the query contents.
+
+## Runtime proof before using the endpoint
+
+After merge and Flux reconciliation, confirm all of the following before
+enabling the evaluation Job:
+
+1. `torproxy` becomes Ready only after `/ip` reports a Tor exit address.
+2. The Tor-backed SearXNG pod can reach the SOCKS service and return JSON
+   search results.
+3. A request through `searxng-tor` reports a Tor exit address when checked with
+   a dedicated diagnostic request routed through the same SearXNG proxy.
+4. With the Tor proxy unavailable, a request fails and Cilium/Hubble shows no
+   direct egress or external DNS query from the SearXNG pod.
+5. A negative test to an unrelated DNS name and direct TCP/443 from the
+   SearXNG pod is denied.
+
+Static manifest validation does not prove these live network properties.
