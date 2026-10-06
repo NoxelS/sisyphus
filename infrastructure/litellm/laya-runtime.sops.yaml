@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: laya-runtime
+    namespace: litellm
+type: Opaque
+stringData:
+    LAYA_API_KEY: ENC[AES256_GCM,data:5sZt8JB1uqs0/TiDJBMg73QpXTLs5t0opZ+JE/9BoOgBPP5Oom4WcZzOasu+zfTOxtpQSbi+vW7eO7gYlg7l+g==,iv:M0ls9/cJ+5fT6NRK6E3VrXsvQpKZdfPwdwI3z3bguEk=,tag:PjD7xJmeOyXBaQa5qpG2Sg==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB3NElHSjFoOXpWNmdzMGRN
+            Q3NTQ2hxQ2pYTjA2eDh1M2taMUc2L28xeW1zCklmcGkwV3ZDR2hDUWlBSWtJNWZQ
+            VmhUNVVSS3pzbFNVTmF4L3lFcTRWQ0UKLS0tIGI0V0Z3bUlycmF6WFU2T2FqZFlO
+            dUpDRmYyZU1oM05ZNFJRRml3TG5KOU0Kjnb+ZLDW0tXVdKNdYzeO2APNFq2d2+4T
+            tPYgCiU67Ii/Srtm90Indn7vJSZ2AKN384iXg3ezMmthmS/DCrXDBw==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age18rzcjdhhf4kdfnkjnj7uwmtt36lu5r3kzvdfpdeu78kau73ekqgsfh222y
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA3UDV2czYxRVppNGJKb2o1
+            bURESWY1VTlhc2Y3UDNKUW5aTi9YMURpNGp3CnZqSllNTk5TSFowb21hbDRoZ3NM
+            K3NsZXV2ZjVDT1FVUTN2UStrRmdvYmcKLS0tIE83YmVNc2ZmTlJxdkdTS0x1RGJF
+            b1BoRm0wWDhlMEN6VW04YXRVa1hmemcKhdzdmJpJi8M8+erYA4JgygLsvpf5UX6O
+            qd5hSp9xCRd+3w9sR+RGOyufDnYPLbax5GgpGEmsyf4dHfXBtUwPcA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1z9y7aurkjwxu75dckqnt27f0kds4tecf9m9ctpptg43e9un7vp6qpf8ext
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-10-06T10:20:22Z"
+    mac: ENC[AES256_GCM,data:LNjjNIHYoCEDoz/gCYK0ijqdhYz1P/FT8j/l1bk/4thD8Ai7DFKoKlAJI7duJDQt7eiPud/seXpTU1R/dyOjO6DILcwV+DfDLyDNVGb1LtbCDbMIkCU6Wes5vINfypT5QA4TUMV/OVoPiktW8++I43GOAveRg7EvjiNS1AAiO2A=,iv:ivDaeDUiUGxCPkE44du3WLTczrO073nNYrgiTw1+5Fo=,tag:MDiX6HpLM2Q1pIMm1ByBjA==,type:str]
+    version: 3.13.0
