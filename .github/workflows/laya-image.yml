@@ -36,7 +36,7 @@ jobs:
           docker run -d --name laya-test --network laya-test \
             --network-alias laya.litellm.svc.cluster.local --read-only \
             --tmpfs /tmp:rw,noexec,nosuid,size=64m --cap-drop ALL \
-            --security-opt no-new-privileges --cpus 2 --memory 2g \
+            --security-opt no-new-privileges --cpus 2 --memory 3g \
             -v "$PWD/containers/laya/smoke.py:/app/smoke.py:ro" \
             -e LAYA_API_KEY=smoke-key laya:test
           docker exec laya-test python /app/smoke.py
@@ -76,4 +76,8 @@ jobs:
           docker push ghcr.io/noxels/sisyphus-laya-english:sha-${{ github.sha }}
       - name: Diagnostics
         if: always()
-        run: docker logs laya-test 2>/dev/null || true
+        run: |
+          docker inspect --format 'OOMKilled={{.State.OOMKilled}} ExitCode={{.State.ExitCode}}' laya-test || true
+          docker logs laya-test 2>/dev/null || true
+          docker stats --no-stream laya-test || true
+          docker logs proxy-test 2>/dev/null || true

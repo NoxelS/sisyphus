@@ -20,7 +20,9 @@ def request(path, body=None, token=None):
     try:
         with urllib.request.urlopen(urllib.request.Request(URL + path, data=data, headers=headers),
                                     timeout=30) as response:
-            return response.status, json.load(response)
+            result = json.load(response)
+            print(f"HTTP {path}: {response.status}", flush=True)
+            return response.status, result
     except urllib.error.HTTPError as error:
         return error.code, None
 
@@ -59,6 +61,7 @@ def main():
     stress = {"state": "The sky is blue. " * 100,
               "questions": {f"color{i}": body["questions"]["color"] for i in range(4)},
               "max_len": 512, "head_max_len": 512}
+    print("Starting maximum-size inference", flush=True)
     assert request("/v1/systemone", stress, "smoke-key")[0] == 200
     latencies = []
     for _ in range(10):
