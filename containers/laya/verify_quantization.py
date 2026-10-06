@@ -61,6 +61,7 @@ def main(precision):
               "latency_p50_seconds": statistics.median(latencies),
               "latency_p95_seconds": sorted(latencies)[474],
               "peak_rss_mib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024}
+    report.update(json.loads((ROOT / "quantization.json").read_text()))
     passed = fp32_accuracy >= .80 and accuracy >= fp32_accuracy - .02 and agreement >= .97
     report["passed"] = passed
     (ROOT / "validation.json").write_text(json.dumps(report, indent=2) + "\n")

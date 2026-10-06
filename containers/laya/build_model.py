@@ -1,5 +1,6 @@
 """Build offline model assets; phases run separately to release large graphs."""
 
+import json
 import shutil
 import sys
 import urllib.request
@@ -30,7 +31,22 @@ def main(phase):
         quantizer = MatMulNBitsQuantizer(str(ROOT / "laya.fp32.onnx"), bits=8,
                                        block_size=32, is_symmetric=True, accuracy_level=0,
                                        op_types_to_quantize=("MatMul",))
+        # The dynamo exporter emits Gemm for many linear layers. Canonicalize those
+        # first; MatMul-only quantization otherwise leaves most weights in FP32.
+        quantizer.model.replace_gemm_with_matmul()
+        original_bytes = sum(len(value.raw_data)
+                             for value in quantizer.model.model.graph.initializer)
         quantizer.process()
+        remaining_bytes = sum(len(value.raw_data)
+                              for value in quantizer.model.model.graph.initializer)
+        if remaining_bytes > original_bytes * .5:
+            raise RuntimeError("INT8 export did not reduce initializer storage by at least 50%")
+        storage = {"fp32_initializer_bytes": original_bytes,
+                   "int8_initializer_bytes": remaining_bytes,
+                   "quantized_matmul_count": sum(node.op_type == "MatMulNBits"
+                       for node in quantizer.model.model.graph.node)}
+        (ROOT / "quantization.json").write_text(json.dumps(storage, indent=2) + "\n")
+        print(json.dumps(storage), flush=True)
         if not any(node.op_type == "MatMulNBits" for node in quantizer.model.model.graph.node):
             raise RuntimeError("Export did not produce any INT8 weight-only operators")
         quantizer.model.save_model_to_file(str(MODEL / "laya.int8.onnx"), True)

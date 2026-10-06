@@ -86,7 +86,7 @@ spec:
             auth: true
             methods: [POST]
             forward_headers: false
-            timeout: 10
+            timeout: 30
             headers:
               Authorization: Bearer os.environ/LAYA_API_KEY
               content-type: application/json

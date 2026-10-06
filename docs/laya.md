@@ -4,7 +4,9 @@ Laya is a CPU-only, single-replica decision service in the `litellm` namespace.
 It serves the English 421M checkpoint from `convaiinnovations/laya`, pinned to
 `55cf4c4ebb4ebe31b2550e8bdf3bd21b99753851`, using Laya 0.3.28 and ONNX Runtime
 1.30.0. MatMul weights use symmetric block INT8 (32 weights per block);
-activations, embeddings and other operators remain floating point. This is not
+activations, embeddings and other operators remain floating point. Exported `Gemm`
+layers are converted to MatMul before quantization, and the build requires at
+least a 50% reduction in initializer storage. This is not
 the upstream dynamic-activation INT8 export, which has documented decision drift.
 
 ## Client contract
@@ -40,7 +42,7 @@ request = urllib.request.Request(
         "Content-Type": "application/json",
     },
 )
-with urllib.request.urlopen(request, timeout=15) as response:
+with urllib.request.urlopen(request, timeout=45) as response:
     print(json.load(response))
 ```
 
@@ -61,7 +63,7 @@ for English automatically; callers must provide English input. Batch requests
 are disabled. Request limits are 64 KiB JSON, 8,000 state characters, four
 questions, 20 choices or score levels per question, and 512 tokens for either
 encoder or decision-head overrides. Long inputs may be truncated by Laya; inspect
-its usage/truncation fields. LiteLLM's upstream timeout is 10 seconds.
+its usage/truncation fields. LiteLLM's upstream timeout is 30 seconds.
 
 One inference executes at a time using two CPU threads. Two requests may be
 admitted (one running, one waiting); excess requests receive 503 with
