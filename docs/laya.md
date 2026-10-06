@@ -82,6 +82,15 @@ other reservations change. CPU requests permit bursts and do not guarantee two
 cores under contention. This remains a single-node service. Recreate upgrades
 avoid a second resident model and cause a brief outage.
 
+The validated AMD64 hosted-runner test used the same two-CPU/2-GiB limits and
+an internal network with no egress. With four questions, 20 long choice labels
+each and 512-token overrides, 10 sequential requests measured 12.95 seconds
+median and 13.28 seconds maximum. A four-client burst returned two 200s
+(at 12.92 and 25.83 seconds) and two immediate 503s. Service peak RSS was
+1,089 MiB and final RSS 1,041 MiB; the earlier two-choice stress run peaked at
+1,135 MiB. CI rejects peak RSS above the 1,152-MiB request. These are smoke-test
+observations, not a production latency percentile or memory guarantee.
+
 The image embeds weights and tokenizer. Inference has no network egress, no
 Kubernetes credentials, a read-only root filesystem, and only a bounded `/tmp`.
 Startup preloads and warms the checkpoint before the HTTP server becomes ready.
@@ -96,6 +105,12 @@ same 512-token question contract used in the earlier evaluation. Publication
 requires FP32 accuracy of at least 80%, INT8 accuracy no more than two percentage
 points lower, and at least 97% decision agreement. Probability drift and INT8
 latency/RSS are reported, not inferred from the model's size.
+
+The paired October 6 validation achieved 84.4% FP32 accuracy and 84.8% INT8
+accuracy (422 and 424 correct out of 500), with 99.2% decision agreement
+(496/500). Mean absolute probability drift was 0.003391; maximum drift was
+0.0876. Quantization reduced initializer storage from 1,685,175,801 to
+640,598,201 bytes, with 122 quantized MatMul operators.
 
 This is a BoolQ regression gate, not a new comparison against Jev or proof of
 score/noul accuracy or probability calibration on production workloads. Validate
