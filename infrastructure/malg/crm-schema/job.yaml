@@ -23,7 +23,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: schema
-          image: ghcr.io/noxels/malg:v0.36.0@sha256:970e4f6487ab814133e75ddeabfb8a8e2de7099121360c8c0e9e9c2fc9014224 # {"$imagepolicy": "flux-system:malg"}
+          image: ghcr.io/noxels/malg:v0.37.0@sha256:1da09c1d83e2092dbb1dbd0d6160d6496a82520d58c7ffd3e2305441c791b1bd # {"$imagepolicy": "flux-system:malg"}
           command: ["python", "-m", "malg.crm", "schema", "apply"]
           env:
             - name: MALG_TWENTY__BASE_URL
