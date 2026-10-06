@@ -38,8 +38,10 @@ jobs:
             --tmpfs /tmp:rw,noexec,nosuid,size=64m --cap-drop ALL \
             --security-opt no-new-privileges --cpus 2 --memory 2g \
             -v "$PWD/containers/laya/smoke.py:/app/smoke.py:ro" \
+            -v "$PWD/containers/laya/test_chat_adapter.py:/app/test_chat_adapter.py:ro" \
             -e LAYA_API_KEY=smoke-key laya:test
           docker cp laya-test:/opt/laya/validation.json validation.json
+          docker exec laya-test python /app/test_chat_adapter.py
           docker exec laya-test python /app/smoke.py
           docker exec laya-test cat /tmp/runtime-validation.json > runtime-validation.json
           docker stats --no-stream laya-test
