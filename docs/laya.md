@@ -65,14 +65,17 @@ questions, 20 choices or score levels per question, and 512 tokens for either
 encoder or decision-head overrides. Long inputs may be truncated by Laya; inspect
 its usage/truncation fields. LiteLLM's upstream timeout is 30 seconds.
 
-One inference executes at a time using two CPU threads. Two requests may be
+One question row executes at a time using two CPU threads. Multiple questions
+in a request execute sequentially; native collation, decoding, masks and usage
+stay in upstream Laya. Workspace arenas and memory-pattern caching are disabled
+to avoid retaining large allocations after a long request. Two requests may be
 admitted (one running, one waiting); excess requests receive 503 with
 `Retry-After: 1`. Two admissions are not two parallel inferences. Sustained
 throughput is approximately the reciprocal of measured service time; a queued
 request adds the preceding request's service time. Measure on Sisyphus before
 relying on a latency or throughput SLO. CI timing describes its hosted runner.
 
-The pod requests 250m CPU and 1 GiB RAM, with limits of two CPUs and 2 GiB RAM.
+The pod requests 250m CPU and 1152 MiB RAM, with limits of two CPUs and 2 GiB RAM.
 These reservations preserve approximately one CPU and 1 GiB for LiteLLM's
 migration Job under the October 6 capacity snapshot. They must be revisited if
 other reservations change. CPU requests permit bursts and do not guarantee two

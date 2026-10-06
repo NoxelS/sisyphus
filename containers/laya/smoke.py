@@ -19,7 +19,7 @@ def request(path, body=None, token=None):
     data = None if body is None else json.dumps(body).encode()
     try:
         with urllib.request.urlopen(urllib.request.Request(URL + path, data=data, headers=headers),
-                                    timeout=30) as response:
+                                    timeout=90) as response:
             result = json.load(response)
             print(f"HTTP {path}: {response.status}", flush=True)
             return response.status, result
@@ -58,6 +58,25 @@ def main():
     assert status == 200, status
     assert result["answers"]["truth"]["type"] == "noul", result
     assert result["answers"]["strength"]["type"] == "score", result
+    mixed = {"color": body["questions"]["color"],
+             "truth": {"type": "noul", "instructions": "Is the sky blue?",
+                       "criteria": {"false": "No", "true": "Yes"}},
+             "strength": {"type": "score", "instructions": "Rate evidence that the sky is blue.",
+                          "criteria": ["none", "weak", "strong"]}}
+    status, combined = request("/v1/systemone", {"state": body["state"], "questions": mixed},
+                               "smoke-key")
+    assert status == 200
+    for name, question in mixed.items():
+        status, single = request("/v1/systemone", {"state": body["state"],
+                                "questions": {name: question}}, "smoke-key")
+        assert status == 200
+        answer = combined["answers"][name]
+        reference = single["answers"][name]
+        if "probabilities" in answer:
+            assert all(abs(value - reference["probabilities"][key]) <= .002
+                       for key, value in answer["probabilities"].items()), (answer, reference)
+        else:
+            assert abs(answer["noul"] - reference["noul"]) <= .002, (answer, reference)
     stress = {"state": "The sky is blue. " * 100,
               "questions": {f"color{i}": body["questions"]["color"] for i in range(4)},
               "max_len": 512, "head_max_len": 512}
