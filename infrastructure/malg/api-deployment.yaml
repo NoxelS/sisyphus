@@ -37,7 +37,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api
-          image: ghcr.io/noxels/malg:v0.39.0@sha256:678a3fc0ce3b501122d087a4b5b6bbb2dd72ff4cdd44110fc2465e2b9198c567 # {"$imagepolicy": "flux-system:malg"}
+          image: ghcr.io/noxels/malg:v0.40.0@sha256:43a3e41e6be6d785a15ca496e1f38b57ba071770166169754bae8f43b3fe9530 # {"$imagepolicy": "flux-system:malg"}
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "-c", "python -m malg.database.wait_for_schema --timeout-seconds 300 && exec uvicorn malg.api.app:app --host 0.0.0.0 --port 8000"]
           envFrom:
