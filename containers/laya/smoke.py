@@ -78,7 +78,9 @@ def main():
         else:
             assert abs(answer["noul"] - reference["noul"]) <= .002, (answer, reference)
     stress = {"state": "The sky is blue. " * 100,
-              "questions": {f"color{i}": body["questions"]["color"] for i in range(4)},
+              "questions": {f"color{i}": body["questions"]["color"] | {
+                  "criteria": {f"color {option:02}: " + "a detailed alternative " * 4: None
+                               for option in range(20)}} for i in range(4)},
               "max_len": 512, "head_max_len": 512}
     print("Starting maximum-size inference", flush=True)
     assert request("/v1/systemone", stress, "smoke-key")[0] == 200
@@ -98,7 +100,7 @@ def main():
     with ThreadPoolExecutor(max_workers=4) as pool:
         concurrency = list(pool.map(concurrent_request, range(4)))
     assert all(row["status"] in (200, 503) for row in concurrency), concurrency
-    assert any(row["status"] == 200 for row in concurrency), concurrency
+    assert sorted(row["status"] for row in concurrency) == [200, 200, 503, 503], concurrency
     status = Path("/proc/1/status").read_text().splitlines()
     memory = {line.split(":")[0]: int(line.split()[1]) / 1024 for line in status
               if line.startswith(("VmRSS:", "VmHWM:"))}
@@ -107,6 +109,7 @@ def main():
               "four_client_burst": concurrency, "service_memory_mib": memory}
     Path("/tmp/runtime-validation.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report), flush=True)
+    assert memory["VmHWM"] <= 1152, "Peak RSS exceeds the Kubernetes reservation"
     print("English HTTP, authentication, routing and request-bound checks passed")
 
 
