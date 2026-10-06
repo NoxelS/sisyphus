@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: torproxy
+  namespace: malg
+  labels:
+    app.kubernetes.io/name: torproxy
+    app.kubernetes.io/instance: torproxy
+    app.kubernetes.io/part-of: malg
+    app.kubernetes.io/component: search
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: torproxy
+      app.kubernetes.io/instance: torproxy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: torproxy
+        app.kubernetes.io/instance: torproxy
+        app.kubernetes.io/part-of: malg
+        app.kubernetes.io/component: search
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: torproxy
+          image: docker.io/hapheus/torproxy:v1.0.0@sha256:a02bb48b6e599649c94e1ecd515359f0d9f04f23ea842d585ed28fdd08168fe7
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: socks
+              containerPort: 9050
+              protocol: TCP
+            - name: api
+              containerPort: 8080
+              protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 384Mi
+          startupProbe:
+            httpGet:
+              path: /status
+              port: api
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /ip
+              port: api
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
