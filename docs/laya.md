@@ -61,7 +61,8 @@ explicitly as above. The adapter accepts only `model`, `messages`, `stream: fals
 sampling controls and conversational/multimodal messages are refused. Native
 request limits still apply; the chat wrapper itself is capped at 128 KiB.
 Native input/output token counts map to OpenAI prompt/completion counts; local
-model token prices are zero. LiteLLM performs its standard model access checks.
+model token prices are zero. LiteLLM performs its standard model access checks
+and follows the proxy's existing prompt/spend logging configuration.
 
 The native Jev-shaped endpoint at `POST /laya/v1/systemone` remains available
 for administrative experiments with the LiteLLM master key. In LiteLLM v1.104.0,
@@ -129,6 +130,13 @@ Startup preloads and warms the checkpoint before the HTTP server becomes ready.
 Cilium permits requests from LiteLLM and host health probes only.
 
 ## Image validation and rollout
+
+The image pipeline is required to produce deployable model/runtime images. It
+runs for model, dependency, serving-code or pipeline changes; manifest-only
+changes reuse the pinned image. Expensive model export/evaluation layers may
+reuse the build cache when their inputs are unchanged. Runtime HTTP and real
+LiteLLM integration checks run before every publication. Flux deploys the pinned
+digest; it does not build or quantize models on the cluster.
 
 `Build Laya English INT8` builds on a native AMD64 runner. Before publication it
 compares eager FP32 and weight-only INT8 on the same 500 BoolQ validation examples,
