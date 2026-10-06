@@ -44,6 +44,9 @@ with urllib.request.urlopen(request, timeout=15) as response:
     print(json.load(response))
 ```
 
+Laya 0.3.28 clamps the checkpoint's temperature for 11 or more choices to its
+supported minimum. Treat confidence for that bucket as uncalibrated.
+
 Answers contain the native `choice`, `score` or `noul` result and probabilities,
 with token usage. This endpoint uses LiteLLM's authenticated pass-through API;
 it is not an OpenAI chat-completions model. Chat model routing, pricing and

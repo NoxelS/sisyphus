@@ -37,9 +37,9 @@ jobs:
             --network-alias laya.litellm.svc.cluster.local --read-only \
             --tmpfs /tmp:rw,noexec,nosuid,size=64m --cap-drop ALL \
             --security-opt no-new-privileges --cpus 2 --memory 2g \
+            -v "$PWD/containers/laya/smoke.py:/app/smoke.py:ro" \
             -e LAYA_API_KEY=smoke-key laya:test
-          docker cp containers/laya/smoke.py laya-test:/tmp/smoke.py
-          docker exec laya-test python /tmp/smoke.py
+          docker exec laya-test python /app/smoke.py
           docker cp laya-test:/opt/laya/validation.json validation.json
           docker cp laya-test:/tmp/runtime-validation.json runtime-validation.json
           docker stats --no-stream laya-test
