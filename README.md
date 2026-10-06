@@ -36,7 +36,7 @@ storage, access, applications, observability, and update automation.
 | **Storage** | Rancher local-path at `/var/mnt/local-path`, `Retain`, node-local only |
 | **Applications** | Kite, LiteLLM, and portfolio staging |
 | **Data** | Dedicated PostgreSQL releases for Kite and LiteLLM, plus Redis for LiteLLM |
-| **Observability** | Prometheus, Alertmanager, Grafana, Loki, Grafana Alloy, and Hubble |
+| **Observability** | Metrics Server, Prometheus, Alertmanager, Grafana, Loki, Grafana Alloy, and Hubble |
 | **Automation** | Renovate, GitHub Actions validation, and reviewed Flux image updates |
 
 ## 🔁 How changes reach the cluster
