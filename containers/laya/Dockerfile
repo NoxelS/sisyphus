@@ -26,7 +26,7 @@ COPY --from=builder --chown=1000:1000 /opt/laya /opt/laya
 ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_HOME=/tmp/huggingface \
     LAYA_DEVICE=cpu LAYA_THREADS=2 LAYA_MAX_CONCURRENT=2 \
     LAYA_MAX_TOKEN_BUDGET=512 LAYA_IDLE_UNLOAD_SECONDS=0
-COPY bounded_server.py .
+COPY bounded_server.py chat_adapter.py ./
 USER 1000:1000
 EXPOSE 8000
 CMD ["python", "bounded_server.py"]

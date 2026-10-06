@@ -5,6 +5,7 @@ from unittest.mock import patch
 import numpy as np
 import onnxruntime as ort
 import uvicorn
+from chat_adapter import install_chat_adapter
 from server import create_app
 
 
@@ -39,7 +40,9 @@ def bounded_app():
 
     # Laya has no session-factory injection; restore ORT immediately after startup.
     with patch.object(ort, "InferenceSession", bounded_session):
-        return create_app()
+        app = create_app()
+    install_chat_adapter(app)
+    return app
 
 
 if __name__ == "__main__":
