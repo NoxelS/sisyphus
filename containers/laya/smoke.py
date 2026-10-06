@@ -77,6 +77,23 @@ def main():
                        for key, value in answer["probabilities"].items()), (answer, reference)
         else:
             assert abs(answer["noul"] - reference["noul"]) <= .002, (answer, reference)
+    chat = {"model": "laya-english", "messages": [
+        {"role": "user", "content": json.dumps(body)}],
+        "response_format": {"type": "json_object"}}
+    assert request("/v1/chat/completions", chat)[0] == 401
+    assert request("/v1/chat/completions", chat, "invalid")[0] == 401
+    status, result = request("/v1/chat/completions", chat, "smoke-key")
+    assert status == 200, status
+    native = json.loads(result["choices"][0]["message"]["content"])
+    assert native["answers"]["color"]["choice"] == "blue", native
+    assert result["usage"]["prompt_tokens"] == native["usage"]["input_tokens"]
+    assert result["usage"]["completion_tokens"] == native["usage"]["output_tokens"]
+    for overrides in ({"model": "other"}, {"stream": True}, {"temperature": .5},
+                      {"messages": [{"role": "user", "content": "not JSON"}]},
+                      {"messages": []}):
+        assert request("/v1/chat/completions", chat | overrides, "smoke-key")[0] == 422
+    assert request("/v1/chat/completions", chat | {"messages": [{"role": "user",
+                   "content": json.dumps(body | {"max_len": 513})}]}, "smoke-key")[0] == 422
     stress = {"state": "The sky is blue. " * 100,
               "questions": {f"color{i}": body["questions"]["color"] | {
                   "criteria": {f"color {option:02}: " + "a detailed alternative " * 4: None

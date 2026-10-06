@@ -29,7 +29,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: laya
-          image: ghcr.io/noxels/sisyphus-laya-english@sha256:1268aba1f83f11e0214a4edb171a2ea045b4a651ce93d21cf0cce57e61d19bdd
+          image: ghcr.io/noxels/sisyphus-laya-english@sha256:c69852f5413efda456d6f36163f15c5ba84d57ee3321e03524eae8d7e640e526
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

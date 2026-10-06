@@ -79,6 +79,17 @@ spec:
           model_info:
             mode: chat
             max_input_tokens: 262144
+        - model_name: laya-english
+          litellm_params:
+            model: openai/laya-english
+            api_base: http://laya.litellm.svc.cluster.local:8000/v1
+            api_key: os.environ/LAYA_API_KEY
+            timeout: 60
+            max_parallel_requests: 2
+            input_cost_per_token: 0
+            output_cost_per_token: 0
+          model_info:
+            mode: chat
       general_settings:
         pass_through_endpoints:
           - path: /laya/v1/systemone
@@ -86,7 +97,7 @@ spec:
             auth: true
             methods: [POST]
             forward_headers: false
-            timeout: 30
+            timeout: 60
             headers:
               Authorization: Bearer os.environ/LAYA_API_KEY
               content-type: application/json
