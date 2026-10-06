@@ -285,6 +285,34 @@ Tailscale client on each travel device and verify its public IP has changed to
 the Netcup server address. Selecting an exit node is explicit per client;
 normal node and workload egress remains direct.
 
+## Resource Metrics API
+
+The `metrics-server` Flux Kustomization waits for Cilium and installs the
+upstream Metrics Server Helm chart `3.14.0` (Metrics Server `0.9.0`) in
+`kube-system`. It runs one replica with a ClusterIP service and requires no
+persistent storage or public route. It provides `metrics.k8s.io` for
+`kubectl top`, resource metrics in Kubernetes dashboards, and CPU/memory HPA.
+Prometheus and kube-state-metrics serve separate observability purposes.
+
+The current Talos kubelet serving certificate uses a node-local CA and contains
+only a hostname SAN. Metrics Server therefore uses `--kubelet-insecure-tls`:
+kubelet traffic remains encrypted and authenticated with its service account,
+but the kubelet server certificate is not verified. Remove this flag after
+configuring CA-signed kubelet serving certificates through Talos and arranging
+approval/renewal of their serving CSRs. The chart retains its upstream default
+self-signed Metrics Server API certificate and APIService TLS verification
+bypass; neither endpoint is exposed publicly.
+
+After the change reaches `main`, verify reconciliation and actual metrics:
+
+```sh
+flux get kustomizations metrics-server --namespace flux-system
+flux get helmreleases metrics-server --namespace kube-system
+kubectl wait --for=condition=Available apiservice/v1beta1.metrics.k8s.io --timeout=2m
+kubectl top nodes
+kubectl top pods --all-namespaces
+```
+
 ## Observability
 
 The `observability` Flux Kustomization depends on storage and Cilium and
