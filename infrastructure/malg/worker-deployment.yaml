@@ -21,6 +21,8 @@ spec:
       app.kubernetes.io/instance: malg-worker
   template:
     metadata:
+      annotations:
+        malg.noel.fyi/search-endpoint: "http://searxng-tor:8080"
       labels:
         app.kubernetes.io/name: worker
         app.kubernetes.io/instance: malg-worker

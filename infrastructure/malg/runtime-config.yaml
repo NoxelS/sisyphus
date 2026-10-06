@@ -10,7 +10,7 @@ data:
   MALG_LLM__MAX_TOKENS: "32768"
   MALG_LLM__REQUEST_TIMEOUT_SECONDS: "600"
   MALG_LLM__MAX_RETRIES: "3"
-  MALG_SEARCH__URL: http://searxng:8080
+  MALG_SEARCH__URL: http://searxng-tor:8080
   MALG_AUTH__USERNAME: admin
   MALG_TWENTY__BASE_URL: http://twenty.twenty.svc.cluster.local:3000
   MALG_TWENTY__PUBLIC_URL: https://twenty.noel.fyi
