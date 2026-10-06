@@ -55,6 +55,7 @@ spec:
     environmentSecrets:
       - litellm-runtime
       - redis-credentials
+      - laya-runtime
     service:
       type: ClusterIP
       port: 4000
@@ -79,6 +80,16 @@ spec:
             mode: chat
             max_input_tokens: 262144
       general_settings:
+        pass_through_endpoints:
+          - path: /laya/v1/systemone
+            target: http://laya.litellm.svc.cluster.local:8000/v1/systemone
+            auth: true
+            methods: [POST]
+            forward_headers: false
+            timeout: 10
+            headers:
+              Authorization: bearer os.environ/LAYA_API_KEY
+              content-type: application/json
         master_key: os.environ/PROXY_MASTER_KEY
         store_model_in_db: true
         store_prompts_in_spend_logs: true

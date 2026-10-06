@@ -39,6 +39,8 @@ storage, access, applications, observability, and update automation.
 | **Observability** | Prometheus, Alertmanager, Grafana, Loki, Grafana Alloy, and Hubble |
 | **Automation** | Renovate, GitHub Actions validation, and reviewed Flux image updates |
 
+Laya English decision serving through LiteLLM is described in [docs/laya.md](docs/laya.md).
+
 ## 🔁 How changes reach the cluster
 
 1. A change is proposed against `main` and checked by GitHub Actions.
