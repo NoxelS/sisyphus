@@ -34,7 +34,7 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: wait-for-postgresql
-          image: twentycrm/twenty:v2.45.6@sha256:dca6d82985901468b391c0335aa8f0519a52b9809709e66f2de1dbff04351e53 # {"$imagepolicy": "flux-system:twenty"}
+          image: twentycrm/twenty:v2.46.0@sha256:bb4e94f0215cbd14c7356b0324d9b7ac10ccd077042cd6d5058ad02ef2080605 # {"$imagepolicy": "flux-system:twenty"}
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "-c", "until psql \"$PG_DATABASE_URL\" -c 'SELECT 1'; do sleep 5; done"]
           env:
@@ -60,7 +60,7 @@ spec:
               mountPath: /tmp
       containers:
         - name: server
-          image: twentycrm/twenty:v2.45.6@sha256:dca6d82985901468b391c0335aa8f0519a52b9809709e66f2de1dbff04351e53 # {"$imagepolicy": "flux-system:twenty"}
+          image: twentycrm/twenty:v2.46.0@sha256:bb4e94f0215cbd14c7356b0324d9b7ac10ccd077042cd6d5058ad02ef2080605 # {"$imagepolicy": "flux-system:twenty"}
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
