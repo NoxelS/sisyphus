@@ -1,0 +1,16 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: searxng-tor
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./infrastructure/searxng-tor
+  prune: true
+  wait: true
+  timeout: 10m
+  dependsOn:
+    - name: malg
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

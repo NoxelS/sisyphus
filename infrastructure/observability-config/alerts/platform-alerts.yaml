@@ -65,12 +65,15 @@ spec:
             summary: Node CPU usage has exceeded 85% for 20 minutes
         - alert: FluxReconciliationStalled
           expr: |-
-            gotk_reconcile_condition{type="Ready",status="False"} == 1
+            gotk_resource_info{ready="False"} == 1
           for: 15m
           labels:
             severity: warning
           annotations:
-            summary: Flux reconciliation has failed for 15 minutes
+            summary: >-
+              Flux {{ $labels.customresource_kind }}
+              {{ $labels.exported_namespace }}/{{ $labels.name }} has failed
+              for 15 minutes
         - alert: CloudflareTunnelUnavailable
           expr: |-
             kube_deployment_status_replicas_available{namespace="cloudflare-tunnel",deployment="cloudflared"} < 1

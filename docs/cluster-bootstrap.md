@@ -180,7 +180,7 @@ LiteLLM proxy worker, a standalone PostgreSQL database, standalone Redis,
 Headroom, and the Solheim-backed `qwen3.8-27b` chat model. The model routes
 OpenAI-compatible chat requests to Solheim over HTTPS and reads
 `SOLHEIM_API_KEY` from the `litellm-runtime` Secret. Its LiteLLM metadata
-advertises a 262,144-token context window and permits up to three concurrent
+advertises a 262,144-token context window and permits up to twelve concurrent
 upstream requests. LiteLLM stores model records and records estimated request
 spend using Alibaba Cloud Model Studio's international Qwen3.8-27B on-demand
 benchmark: $0.50 per million input tokens and $3.00 per million output tokens.
@@ -285,6 +285,34 @@ Tailscale client on each travel device and verify its public IP has changed to
 the Netcup server address. Selecting an exit node is explicit per client;
 normal node and workload egress remains direct.
 
+## Resource Metrics API
+
+The `metrics-server` Flux Kustomization waits for Cilium and installs the
+upstream Metrics Server Helm chart `3.14.0` (Metrics Server `0.9.0`) in
+`kube-system`. It runs one replica with a ClusterIP service and requires no
+persistent storage or public route. It provides `metrics.k8s.io` for
+`kubectl top`, resource metrics in Kubernetes dashboards, and CPU/memory HPA.
+Prometheus and kube-state-metrics serve separate observability purposes.
+
+The current Talos kubelet serving certificate uses a node-local CA and contains
+only a hostname SAN. Metrics Server therefore uses `--kubelet-insecure-tls`:
+kubelet traffic remains encrypted and authenticated with its service account,
+but the kubelet server certificate is not verified. Remove this flag after
+configuring CA-signed kubelet serving certificates through Talos and arranging
+approval/renewal of their serving CSRs. The chart retains its upstream default
+self-signed Metrics Server API certificate and APIService TLS verification
+bypass; neither endpoint is exposed publicly.
+
+After the change reaches `main`, verify reconciliation and actual metrics:
+
+```sh
+flux get kustomizations metrics-server --namespace flux-system
+flux get helmreleases metrics-server --namespace kube-system
+kubectl wait --for=condition=Available apiservice/v1beta1.metrics.k8s.io --timeout=2m
+kubectl top nodes
+kubectl top pods --all-namespaces
+```
+
 ## Observability
 
 The `observability` Flux Kustomization depends on storage and Cilium and
@@ -381,7 +409,41 @@ The generated branches dispatch PR handling to the workflow on current `main`.
 That workflow allows only the expected image manifest files and requests merge
 commits for all three branches. It merges current `main` into a generated
 branch when needed so required checks run against an up-to-date base. The
-required `static-checks` gate controls their merges.
+required `static-checks` gate controls their merges. Each push to `main` also
+rechecks pending image branches, so merging one PR cannot leave another waiting
+for a manual branch update.
+
+### Flux PR GitHub App
+
+PR creation, branch updates, and auto-merge use a dedicated GitHub App token.
+The built-in `GITHUB_TOKEN` causes PR validation to require manual workflow
+approval, independently of the first-time-contributor policy.
+
+One-time setup:
+
+1. Register a private GitHub App on `NoxelS`, with webhooks disabled and only
+   repository **Contents: read and write**, **Pull requests: read and write**,
+   and the mandatory **Metadata: read** permission.
+2. Install it on **only `NoxelS/sisyphus`**. Do not grant branch-protection bypass.
+3. Set the Sisyphus Actions variable `FLUX_APP_CLIENT_ID` to its Client ID.
+4. Generate an App private key and store it as the Sisyphus Actions secret
+   `FLUX_APP_PRIVATE_KEY`. Transfer the downloaded PEM through standard input,
+   for example `gh secret set FLUX_APP_PRIVATE_KEY --repo NoxelS/sisyphus < /path/to/key.pem`.
+   Keep keys out of Git, command arguments, terminal output, and chat.
+
+The workflow mints a short-lived token restricted to this repository and revokes
+it when the job finishes. It never checks out PR code with the App credential.
+Only the `main` workflow handles PRs; Flux pushes dispatch to that version.
+App-authenticated updates can trigger workflows themselves, so PR handling is
+serialized per branch without cancelling an in-progress branch update.
+
+After setup, merge the workflow change and verify a new MALG image PR runs
+`static-checks` without approval, auto-merges, and reaches Ready in Flux with
+the matching backend and frontend version. An already approval-blocked run may
+still need a one-time approval or a fresh App-authenticated branch update.
+A successful image publication alone does not establish deployment success.
+To rotate the key, replace the Actions secret before revoking the old App key;
+removing the installation or secret stops unattended PR management.
 
 Renovate auto-merges minor, patch, pin, and digest updates for stateless
 application images (cloudflared, Headroom, SearXNG, and Lightpanda) and the Kite
@@ -391,10 +453,11 @@ branches may squash-merge after `static-checks`. Major upgrades, Talos,
 Kubernetes, Cilium, Tailscale, observability charts, storage, and database
 changes remain for review. No automation pushes directly to `main`.
 
-Existing Flux branches created before this workflow must be synchronized once
-with current `main` after the workflow PR merges. Resolve image-line conflicts
-to the newest intended image, and bring the new dispatch-only workflow into
-each branch. Subsequent merge commits keep the branch ancestry aligned.
+The three existing Flux branches were aligned to `main` on 2026-10-01 after
+verifying their generated image manifests had no unmerged changes. If an older
+branch is restored, verify its image changes and synchronize it with current
+`main` before the next Flux push. Subsequent merge commits keep its ancestry
+aligned.
 
 Before enabling this workflow, configure GitHub branch protection for `main` to
 require pull requests and the infrastructure validation workflow, disallow

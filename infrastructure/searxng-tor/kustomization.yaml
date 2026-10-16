@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - searxng-tor-settings.yaml
+  - searxng-tor-deployment.yaml
+  - searxng-tor-service.yaml
+  - torproxy-deployment.yaml
+  - torproxy-service.yaml
+  - searxng-tor-network-policy.yaml
+configMapGenerator:
+  - name: torproxy-config
+    namespace: malg
+    files:
+      - torrc

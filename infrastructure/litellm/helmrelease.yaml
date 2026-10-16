@@ -5,6 +5,7 @@ metadata:
   namespace: litellm
 spec:
   interval: 30m
+  timeout: 20m
   dependsOn:
     - name: postgresql
     - name: redis
@@ -25,7 +26,7 @@ spec:
     numWorkers: 1
     image:
       repository: ghcr.io/berriai/litellm
-      tag: v1.100.0@sha256:c8756e7b9a61fe45df2ccb5b781d388c3b2f3a21ef9e4956630caef20f9f03aa
+      tag: v1.104.0@sha256:625981c83410a3ea68eb0697590a57ec1d764d634514d54fa5db0591077ee839
       pullPolicy: IfNotPresent
     serviceAccount:
       create: true
@@ -54,6 +55,7 @@ spec:
     environmentSecrets:
       - litellm-runtime
       - redis-credentials
+      - laya-runtime
     service:
       type: ClusterIP
       port: 4000
@@ -68,7 +70,7 @@ spec:
             model: openai/qwen3.8-27b
             api_base: https://api.solheim.ai/v1
             api_key: os.environ/SOLHEIM_API_KEY
-            max_parallel_requests: 3
+            max_parallel_requests: 12
             # Comparable on-demand benchmark: Alibaba Cloud Model Studio
             # international Qwen3.8-27B pricing ($0.50/$3.00 per 1M tokens).
             # Solheim bills this endpoint as a flat-rate subscription.
@@ -77,7 +79,28 @@ spec:
           model_info:
             mode: chat
             max_input_tokens: 262144
+        - model_name: laya-english
+          litellm_params:
+            model: openai/laya-english
+            api_base: http://laya.litellm.svc.cluster.local:8000/v1
+            api_key: os.environ/LAYA_API_KEY
+            timeout: 60
+            max_parallel_requests: 2
+            input_cost_per_token: 0
+            output_cost_per_token: 0
+          model_info:
+            mode: chat
       general_settings:
+        pass_through_endpoints:
+          - path: /laya/v1/systemone
+            target: http://laya.litellm.svc.cluster.local:8000/v1/systemone
+            auth: true
+            methods: [POST]
+            forward_headers: false
+            timeout: 60
+            headers:
+              Authorization: Bearer os.environ/LAYA_API_KEY
+              content-type: application/json
         master_key: os.environ/PROXY_MASTER_KEY
         store_model_in_db: true
         store_prompts_in_spend_logs: true
@@ -126,7 +149,9 @@ spec:
     resources:
       requests:
         cpu: "1"
-        memory: 4Gi
+        # Keep steady-state reservation below the 4Gi limit so hook Jobs can
+        # schedule alongside the proxy on the single node.
+        memory: 2Gi
       limits:
         cpu: "1"
         memory: 4Gi
@@ -154,7 +179,10 @@ spec:
       resources:
         requests:
           cpu: "1"
-          memory: 2Gi
+          # This pre-upgrade hook schedules before the proxy's new request is
+          # applied. Keep the request within existing node headroom while the
+          # 4Gi limit preserves the memory ceiling required by migrations.
+          memory: 1Gi
         limits:
           cpu: "1"
           memory: 4Gi

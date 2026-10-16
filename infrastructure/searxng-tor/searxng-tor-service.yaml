@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: searxng-tor
+  namespace: malg
+  labels:
+    app.kubernetes.io/name: searxng
+    app.kubernetes.io/instance: searxng-tor
+    app.kubernetes.io/part-of: malg
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: searxng
+    app.kubernetes.io/instance: searxng-tor
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
