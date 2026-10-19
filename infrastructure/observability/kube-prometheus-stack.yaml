@@ -94,11 +94,11 @@ spec:
         size: 2Gi
       resources:
         requests:
-          cpu: 50m
-          memory: 128Mi
+          cpu: 100m
+          memory: 256Mi
         limits:
-          cpu: 500m
-          memory: 512Mi
+          cpu: "2"
+          memory: 1Gi
       grafana.ini:
         server:
           domain: grafana.noel.fyi
