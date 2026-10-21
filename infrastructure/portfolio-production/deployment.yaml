@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portfolio-production
+  namespace: portfolio-production
+  labels:
+    app.kubernetes.io/name: portfolio
+    app.kubernetes.io/instance: portfolio-production
+    app.kubernetes.io/part-of: portfolio
+    app.kubernetes.io/component: frontend
+    environment: production
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: portfolio
+      app.kubernetes.io/instance: portfolio-production
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: portfolio
+        app.kubernetes.io/instance: portfolio-production
+        app.kubernetes.io/part-of: portfolio
+        app.kubernetes.io/component: frontend
+        environment: production
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: frontend
+          image: ghcr.io/noxels/portfolio-frontend:0.0.1@sha256:905c78b8776cb515e3e3bb75530455a630fdf83644ecb7153464cd982f32eb2f # {"$imagepolicy": "flux-system:portfolio-production"}
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: portfolio-config
+          ports:
+            - name: http
+              containerPort: 4321
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi

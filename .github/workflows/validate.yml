@@ -32,6 +32,8 @@ jobs:
         run: uv run --no-project --with pyyaml python scripts/check_malg_deployment.py
       - name: Check LiteLLM deployment safety
         run: uv run --no-project --with pyyaml python scripts/check_litellm_release.py
+      - name: Check portfolio production deployment
+        run: uv run --no-project --with pyyaml python scripts/check_portfolio_deployment.py
       - name: Check Flux alerting safety
         run: uv run --no-project --with pyyaml python scripts/check_flux_alerting.py
       - name: Test deployment checkers

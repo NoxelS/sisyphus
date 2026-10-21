@@ -34,7 +34,7 @@ storage, access, applications, observability, and update automation.
 | **Private access** | Tailscale Kubernetes Operator and a dedicated travel exit-node Connector |
 | **Secrets** | SOPS-encrypted Kubernetes Secrets with age recipients |
 | **Storage** | Rancher local-path at `/var/mnt/local-path`, `Retain`, node-local only |
-| **Applications** | Kite, LiteLLM, and portfolio staging |
+| **Applications** | Kite, LiteLLM, and portfolio staging/production |
 | **Data** | Dedicated PostgreSQL releases for Kite and LiteLLM, plus Redis for LiteLLM |
 | **Observability** | Metrics Server, Prometheus, Alertmanager, Grafana, Loki, Grafana Alloy, and Hubble |
 | **Automation** | Renovate, GitHub Actions validation, and reviewed Flux image updates |
@@ -47,8 +47,8 @@ Laya English decision serving through LiteLLM is described in [docs/laya.md](doc
 2. After its required checks and merge, Flux detects the new Git revision.
 3. Flux decrypts SOPS resources in-cluster, resolves `dependsOn` ordering, and
    reconciles the declared state.
-4. Flux opens image PRs for portfolio staging, MALG, and Twenty. Their PRs use
-   merge commits so reused branches retain their history. Renovate opens PRs
+4. Flux opens image PRs for portfolio staging/production, MALG, and Twenty.
+   Their PRs use merge commits so reused branches retain their history. Renovate opens PRs
    for other application updates, including LiteLLM and cloudflared. Eligible
    application updates merge automatically after `static-checks`; platform,
    database, and major upgrades remain for review. No automation writes
@@ -70,6 +70,7 @@ the documented Talos, Cilium, and Flux bootstrap boundary.
 ## 📚 Documentation
 
 - [Bootstrap, recovery, and operations](docs/cluster-bootstrap.md)
+- [Portfolio production, Cloudflare route, and rollback](docs/portfolio.md)
 - [Repository rules for contributors and agents](AGENTS.md)
 - [Cluster reconciliation root](clusters/sisyphus/kustomization.yaml)
 - [Infrastructure manifests](infrastructure/)

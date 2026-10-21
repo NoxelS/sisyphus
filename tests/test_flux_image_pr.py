@@ -29,13 +29,18 @@ if args[0] == "api":
     if "/git/matching-refs/heads/flux/" in endpoint:
         if scenario.startswith("refs-error-"):
             sys.exit(scenario.removeprefix("refs-error-"))
-        branches = ["flux/malg-image", "flux/twenty-image", "flux/portfolio-staging-image"]
+        branches = [
+            "flux/malg-image", "flux/twenty-image",
+            "flux/portfolio-staging-image", "flux/portfolio-production-image",
+        ]
         refs = [
             {"ref": "refs/heads/" + branch, "object": {"sha": letter * 40}}
-            for branch, letter in zip(branches, "abc")
+            for branch, letter in zip(branches, "abcd")
         ]
         if scenario == "superseded":
             refs[0]["object"]["sha"] = "c" * 40
+        elif scenario == "production-superseded":
+            refs[3]["object"]["sha"] = "e" * 40
         elif scenario in ("missing", "prefix-match"):
             refs[1]["ref"] += "-old"
         elif scenario == "empty":
@@ -45,14 +50,22 @@ if args[0] == "api":
         ahead = 0 if scenario == "merged" else 1
         if scenario == "compare-error":
             sys.exit("HTTP 500")
-        if scenario in ("main-refresh", "dispatch-error", "missing"):
-            target = "c" * 40 if scenario == "missing" else "a" * 40
+        if scenario in ("main-refresh", "dispatch-error", "missing", "production-main-refresh"):
+            target = ("d" if scenario == "production-main-refresh" else
+                      "c" if scenario == "missing" else "a") * 40
             print(1 if endpoint.endswith(target) else 0)
         else:
             print(json.dumps({"ahead_by": ahead, "behind_by": 1}))
     elif endpoint.endswith("/files"):
-        print("README.md" if scenario == "unexpected-file" else
-              "infrastructure/malg/api-deployment.yaml")
+        if scenario == "production-staging-file":
+            print("infrastructure/portfolio-staging/deployment.yaml")
+        elif scenario == "production-extra-file":
+            print("infrastructure/portfolio-production/deployment.yaml\nREADME.md")
+        elif os.environ["HEAD_BRANCH"] == "flux/portfolio-production-image":
+            print("infrastructure/portfolio-production/deployment.yaml")
+        else:
+            print("README.md" if scenario == "unexpected-file" else
+                  "infrastructure/malg/api-deployment.yaml")
     elif endpoint.endswith("/update-branch"):
         Path(os.environ["UPDATED"]).touch()
     else:
@@ -72,6 +85,7 @@ class FluxImagePrTest(unittest.TestCase):
         cls.workflow = yaml.safe_load((ROOT / ".github/workflows/flux-image-pr.yml").read_text())
 
     def run_workflow(self, scenario, job="pull-request", branch="flux/malg-image"):
+        expected_sha = "d" * 40 if branch == "flux/portfolio-production-image" else SHA
         script = self.workflow["jobs"][job]["steps"][-1]["run"]
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -86,8 +100,8 @@ class FluxImagePrTest(unittest.TestCase):
                 SCENARIO=scenario,
                 UPDATED=str(root / "updated"),
                 GITHUB_REPOSITORY="NoxelS/sisyphus",
-                GITHUB_SHA=SHA,
-                HEAD_SHA=SHA,
+                GITHUB_SHA=expected_sha,
+                HEAD_SHA=expected_sha,
                 HEAD_BRANCH=branch,
             )
             result = subprocess.run(
@@ -159,6 +173,7 @@ class FluxImagePrTest(unittest.TestCase):
         self.assertEqual(comparisons, [
             "repos/NoxelS/sisyphus/compare/main..." + "a" * 40,
             "repos/NoxelS/sisyphus/compare/main..." + "c" * 40,
+            "repos/NoxelS/sisyphus/compare/main..." + "d" * 40,
         ])
 
     def test_no_branches_is_successful_noop(self):
@@ -195,3 +210,48 @@ class FluxImagePrTest(unittest.TestCase):
         result, _ = self.run_workflow("dispatch-error", "dispatch", "main")
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("HTTP 403", result.stderr)
+
+    def test_main_refreshes_production_image_branch(self):
+        result, calls = self.run_workflow("production-main-refresh", "dispatch", "main")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        dispatches = [call for call in calls if call[:2] == ["workflow", "run"]]
+        self.assertEqual(len(dispatches), 1)
+        self.assertIn("head_branch=flux/portfolio-production-image", dispatches[0])
+        self.assertIn("head_sha=" + "d" * 40, dispatches[0])
+
+    def test_production_push_dispatches_exact_commit(self):
+        result, calls = self.run_workflow(
+            "push", "dispatch", "flux/portfolio-production-image"
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("head_branch=flux/portfolio-production-image", calls[0])
+        self.assertIn("head_sha=" + "d" * 40, calls[0])
+
+    def test_production_image_pr_merges_only_the_checked_head(self):
+        result, calls = self.run_workflow(
+            "behind", branch="flux/portfolio-production-image"
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        updates = [call for call in calls if "PUT" in call]
+        self.assertEqual(len(updates), 1)
+        self.assertIn("expected_head_sha=" + "d" * 40, updates[0])
+        self.assertEqual(calls[-1][-2:], ["--match-head-commit", UPDATED_SHA])
+        self.assertIn("--auto", calls[-1])
+        self.assertIn("--merge", calls[-1])
+
+    def test_production_branch_cannot_update_staging_or_other_files(self):
+        for scenario in ("production-staging-file", "production-extra-file"):
+            with self.subTest(scenario=scenario):
+                result, calls = self.run_workflow(
+                    scenario, branch="flux/portfolio-production-image"
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("Unexpected Flux PR file", result.stderr)
+                self.assertFalse(any("PUT" in call or "merge" in call for call in calls))
+
+    def test_superseded_production_update_performs_no_mutations(self):
+        result, calls = self.run_workflow(
+            "production-superseded", branch="flux/portfolio-production-image"
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(len(calls), 1)
