@@ -18,3 +18,4 @@ resources:
   - searxng-tor.yaml
   - searxng-evaluation.yaml
   - portfolio-staging.yaml
+  - portfolio-production.yaml

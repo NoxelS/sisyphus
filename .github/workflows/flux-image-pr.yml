@@ -41,7 +41,11 @@ jobs:
             # A merge can leave another image PR behind strict branch protection.
             # Merged branches may have been automatically deleted by GitHub.
             refs="$(gh api "repos/$GITHUB_REPOSITORY/git/matching-refs/heads/flux/")"
-            for branch in flux/malg-image flux/twenty-image flux/portfolio-staging-image; do
+            for branch in \
+              flux/malg-image \
+              flux/twenty-image \
+              flux/portfolio-staging-image \
+              flux/portfolio-production-image; do
               sha="$(jq -r --arg ref "refs/heads/$branch" \
                 '.[] | select(.ref == $ref) | .object.sha' <<< "$refs")"
               if [ -z "$sha" ]; then
@@ -88,7 +92,8 @@ jobs:
           set -euo pipefail
 
           case "$HEAD_BRANCH" in
-            flux/malg-image|flux/twenty-image|flux/portfolio-staging-image) ;;
+            flux/malg-image|flux/twenty-image|flux/portfolio-staging-image|\
+            flux/portfolio-production-image) ;;
             *) echo "Unexpected Flux branch: $HEAD_BRANCH" >&2; exit 1 ;;
           esac
           if ! [[ "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]; then
@@ -154,7 +159,8 @@ jobs:
               flux/malg-image:infrastructure/malg/crm-schema/job.yaml|\
               flux/twenty-image:infrastructure/twenty/server-deployment.yaml|\
               flux/twenty-image:infrastructure/twenty/worker-deployment.yaml|\
-              flux/portfolio-staging-image:infrastructure/portfolio-staging/deployment.yaml) ;;
+              flux/portfolio-staging-image:infrastructure/portfolio-staging/deployment.yaml|\
+              flux/portfolio-production-image:infrastructure/portfolio-production/deployment.yaml) ;;
               *) echo "Unexpected Flux PR file: $file" >&2; exit 1 ;;
             esac
           done <<< "$files"
