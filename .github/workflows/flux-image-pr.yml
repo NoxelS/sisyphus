@@ -45,7 +45,8 @@ jobs:
               flux/malg-image \
               flux/twenty-image \
               flux/portfolio-staging-image \
-              flux/portfolio-production-image; do
+              flux/portfolio-production-image \
+              flux/laya-image; do
               sha="$(jq -r --arg ref "refs/heads/$branch" \
                 '.[] | select(.ref == $ref) | .object.sha' <<< "$refs")"
               if [ -z "$sha" ]; then
@@ -93,7 +94,7 @@ jobs:
 
           case "$HEAD_BRANCH" in
             flux/malg-image|flux/twenty-image|flux/portfolio-staging-image|\
-            flux/portfolio-production-image) ;;
+            flux/portfolio-production-image|flux/laya-image) ;;
             *) echo "Unexpected Flux branch: $HEAD_BRANCH" >&2; exit 1 ;;
           esac
           if ! [[ "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]; then
@@ -160,7 +161,8 @@ jobs:
               flux/twenty-image:infrastructure/twenty/server-deployment.yaml|\
               flux/twenty-image:infrastructure/twenty/worker-deployment.yaml|\
               flux/portfolio-staging-image:infrastructure/portfolio-staging/deployment.yaml|\
-              flux/portfolio-production-image:infrastructure/portfolio-production/deployment.yaml) ;;
+              flux/portfolio-production-image:infrastructure/portfolio-production/deployment.yaml|\
+              flux/laya-image:infrastructure/litellm/laya-deployment.yaml) ;;
               *) echo "Unexpected Flux PR file: $file" >&2; exit 1 ;;
             esac
           done <<< "$files"

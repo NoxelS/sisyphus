@@ -1,0 +1,55 @@
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: laya
+  namespace: flux-system
+spec:
+  image: ghcr.io/noxels/sisyphus-laya-english
+  interval: 5m
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: laya
+  namespace: flux-system
+spec:
+  interval: 5m
+  imageRepositoryRef:
+    name: laya
+  filterTags:
+    pattern: '^build-(?P<build>[0-9]+)$'
+    extract: '$build'
+  digestReflectionPolicy: Always
+  policy:
+    numerical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageUpdateAutomation
+metadata:
+  name: laya
+  namespace: flux-system
+spec:
+  interval: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        email: flux@sisyphus.local
+        name: Flux
+      messageTemplate: |
+        chore(laya): update image
+
+        {{- range .Changed.Changes -}}
+        {{ print .OldValue }} -> {{ println .NewValue }}
+        {{- end }}
+    push:
+      branch: flux/laya-image
+  update:
+    path: ./infrastructure/litellm
+    strategy: Setters

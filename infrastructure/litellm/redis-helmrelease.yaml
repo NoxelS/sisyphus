@@ -23,8 +23,8 @@ spec:
       registry: registry-1.docker.io
       repository: bitnami/redis
       # This chart publishes `latest`; digest is the immutable source of truth.
-      tag: latest@sha256:f4797b37502e6db910d3653368fcfadc171ef605586917774de125ddd05b3e62
-      digest: sha256:ffa455a3ad00bccc24dfde113ef55329dde687da242e9feb6ccd2b30eb93e8f3
+      tag: latest@sha256:33dbb7a4be39e73f0d5178e9040061ecb708946f55169657aa6897ba0a2c71d9
+      digest: sha256:33dbb7a4be39e73f0d5178e9040061ecb708946f55169657aa6897ba0a2c71d9
     auth:
       enabled: true
       existingSecret: redis-credentials
