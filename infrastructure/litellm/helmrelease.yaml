@@ -92,7 +92,7 @@ spec:
             mode: chat
       general_settings:
         pass_through_endpoints:
-          - path: /laya/v1/systemone
+          - path: /laya-native/v1/systemone
             target: http://laya.litellm.svc.cluster.local:8000/v1/systemone
             auth: true
             methods: [POST]
