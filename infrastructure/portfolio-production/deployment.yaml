@@ -39,7 +39,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: frontend
-          image: ghcr.io/noxels/portfolio-frontend:0.0.4@sha256:59105a85173942c972322f56f659bfff4bddb6dbcca7879cba6d10a12da3cc11 # {"$imagepolicy": "flux-system:portfolio-production"}
+          image: ghcr.io/noxels/portfolio-frontend:0.0.5@sha256:bf73a3468efa4f2c89c99b9b40f7662d5335f3cc7fa4c4cf594a21cec93def85 # {"$imagepolicy": "flux-system:portfolio-production"}
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
