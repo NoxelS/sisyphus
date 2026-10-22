@@ -52,13 +52,13 @@ jobs:
           docker create --name proxy-config --entrypoint python \
             -v "$PWD/infrastructure/litellm/helmrelease.yaml:/tmp/helmrelease.yaml:ro" \
             -v "$PWD/containers/laya/proxy_smoke.py:/tmp/proxy_smoke.py:ro" \
-            ghcr.io/berriai/litellm:v1.104.0 /tmp/proxy_smoke.py config
+            ghcr.io/berriai/litellm:v1.106.2@sha256:7294b90f868c5c38c99b83021c7ba46f9b439e95f8e32964c925c7d2563a03f7 /tmp/proxy_smoke.py config
           docker start -a proxy-config
           docker cp proxy-config:/tmp/proxy.yaml proxy.yaml
           docker run -d --name proxy-test --network laya-test \
             -e LAYA_API_KEY=smoke-key -v "$PWD/proxy.yaml:/tmp/proxy.yaml:ro" \
             -v "$PWD/containers/laya/proxy_smoke.py:/tmp/proxy_smoke.py:ro" \
-            ghcr.io/berriai/litellm:v1.104.0 --config /tmp/proxy.yaml --port 4000
+            ghcr.io/berriai/litellm:v1.106.2@sha256:7294b90f868c5c38c99b83021c7ba46f9b439e95f8e32964c925c7d2563a03f7 --config /tmp/proxy.yaml --port 4000
           docker exec proxy-test python /tmp/proxy_smoke.py test
       - uses: actions/upload-artifact@v4
         if: always()
@@ -77,6 +77,8 @@ jobs:
         run: |
           docker tag laya:test ghcr.io/noxels/sisyphus-laya-english:sha-${{ github.sha }}
           docker push ghcr.io/noxels/sisyphus-laya-english:sha-${{ github.sha }}
+          docker tag laya:test ghcr.io/noxels/sisyphus-laya-english:build-${{ github.run_number }}
+          docker push ghcr.io/noxels/sisyphus-laya-english:build-${{ github.run_number }}
       - name: Diagnostics
         if: always()
         run: |

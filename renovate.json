@@ -8,6 +8,8 @@
     "flux",
     "helm-values",
     "kubernetes",
+    "dockerfile",
+    "custom.regex",
     "pep621",
     "github-actions"
   ],
@@ -23,6 +25,15 @@
       "/^clusters\\/sisyphus\\/.+\\.ya?ml$/"
     ]
   },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^infrastructure\\/storage\\/kustomization\\.yaml$/"],
+      "matchStrings": ["https://raw\\.githubusercontent\\.com/rancher/local-path-provisioner/(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)/deploy/local-path-storage\\.yaml"],
+      "depNameTemplate": "rancher/local-path-provisioner",
+      "datasourceTemplate": "github-releases"
+    }
+  ],
   "ignorePaths": [
     "**/*.sops.yaml",
     "clusters/sisyphus/flux-system/gotk-components.yaml",
@@ -41,12 +52,12 @@
     "infrastructure/twenty/image-automation.yaml"
   ],
   "dependencyDashboard": true,
-  "prConcurrentLimit": 5,
+  "prConcurrentLimit": 0,
+  "prHourlyLimit": 0,
   "labels": ["dependencies", "infrastructure"],
   "packageRules": [
     {
       "matchUpdateTypes": ["major"],
-      "dependencyDashboardApproval": true,
       "labels": ["dependencies", "major"]
     },
     {
@@ -80,11 +91,7 @@
       ],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "groupName": "LiteLLM release",
-      "automerge": true,
-      "automergeType": "pr",
-      "platformAutomerge": true,
-      "automergeStrategy": "squash",
-      "labels": ["dependencies", "app-auto-update"]
+      "labels": ["dependencies", "app-update-review"]
     }
   ]
 }

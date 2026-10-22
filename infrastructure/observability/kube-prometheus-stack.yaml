@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: 88.6.5
+      version: 92.11.0
       sourceRef:
         kind: HelmRepository
         name: prometheus-community
@@ -131,6 +131,9 @@ spec:
           enabled: true
     prometheus:
       prometheusSpec:
+        image:
+          tag: v3.15.1-distroless
+          sha: 451a845bae1d51622b41af1780eb2ad911bbb79a9855bc8e9bb67fabbc03f934
         retention: 7d
         retentionSize: 15GiB
         walCompression: true
