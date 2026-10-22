@@ -178,11 +178,10 @@ spec:
       ttlSecondsAfterFinished: 300
       resources:
         requests:
-          cpu: "1"
-          # This pre-upgrade hook schedules before the proxy's new request is
-          # applied. Keep the request within existing node headroom while the
-          # 4Gi limit preserves the memory ceiling required by migrations.
-          memory: 1Gi
+          cpu: 500m
+          # The hook must fit beside the running proxy on the single node.
+          # Its 4Gi memory limit still permits the migration's peak usage.
+          memory: 512Mi
         limits:
           cpu: "1"
           memory: 4Gi
