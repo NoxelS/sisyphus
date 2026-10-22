@@ -31,7 +31,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: searxng
-          image: docker.io/searxng/searxng:latest@sha256:5ed0323b5f5f8701264ef65e239a2bd83cb57098f2b971fa30bf79c06eeae271
+          image: docker.io/searxng/searxng:latest@sha256:a31763b7af3caf6ae9aac1816ba774214eb550252e06a4998f276ded8d60461b
           imagePullPolicy: IfNotPresent
           env:
             - name: SEARXNG_SECRET
