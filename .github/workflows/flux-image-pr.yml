@@ -188,5 +188,20 @@ jobs:
           fi
 
           # Flux reuses these branches, so keep their commits in main.
-          gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --auto --merge \
-            --match-head-commit "$HEAD_SHA"
+          # The PR event can queue a new required check after branch checks pass.
+          # Retry that short mergeability race while retaining the exact head guard.
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            if gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --auto --merge \
+              --match-head-commit "$HEAD_SHA"; then
+              exit 0
+            fi
+            if [ "$(gh pr view "$pr_number" --repo "$GITHUB_REPOSITORY" \
+              --json state --jq '.state')" = MERGED ]; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 12 ]; then
+              echo 'Flux image PR could not enter auto-merge after retries' >&2
+              exit 1
+            fi
+            sleep 5
+          done
