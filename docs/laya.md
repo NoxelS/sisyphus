@@ -64,8 +64,9 @@ Native input/output token counts map to OpenAI prompt/completion counts; local
 model token prices are zero. LiteLLM performs its standard model access checks
 and follows the proxy's existing prompt/spend logging configuration.
 
-The native Jev-shaped endpoint at `POST /laya/v1/systemone` remains available
-for administrative experiments with the LiteLLM master key. In LiteLLM v1.104.0,
+The native Jev-shaped endpoint at `POST /laya-native/v1/systemone` remains available
+for administrative experiments with the LiteLLM master key. LiteLLM v1.106.2
+reserves `/laya/v1/systemone` for its built-in Laya integration. In LiteLLM,
 ordinary virtual keys are denied this authenticated pass-through route unless
 explicitly granted `allowed_passthrough_routes`; assigning that grant requires
 Enterprise. Do not distribute the master key to applications. Both transports
