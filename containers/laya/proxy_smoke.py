@@ -35,7 +35,7 @@ def main(mode):
         headers = {"Content-Type": "application/json"}
         if token:
             headers["Authorization"] = "Bearer " + token
-        request = urllib.request.Request("http://127.0.0.1:4000/laya/v1/systemone",
+        request = urllib.request.Request("http://127.0.0.1:4000/laya-native/v1/systemone",
                                          data=body, headers=headers)
         try:
             with urllib.request.urlopen(request, timeout=15) as response:
