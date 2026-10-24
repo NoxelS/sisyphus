@@ -7,5 +7,5 @@ spec:
   interval: 1h
   url: oci://registry-1.docker.io/bitnamicharts/redis
   ref:
-    tag: 28.3.1
-    digest: sha256:778d8d31eb0d5b697ec0928bcf4a5abc3a642e0b0c19291ef9bfaa48c40f703a
+    tag: 28.3.9
+    digest: sha256:a64402948cc58efdfbedd6ba58741bac5bebee734bf0fd5be9e58f64a9193f56
