@@ -55,5 +55,47 @@ class LiteLLMReleaseTest(unittest.TestCase):
             self.validate(self.release, kustomization)
 
 
+class BitnamiImagePinTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.releases = [
+            yaml.safe_load(path.read_text())
+            for path in check_litellm_release.DEPENDENCY_RELEASES
+        ]
+
+    def test_repository_dependency_images_are_pinned(self) -> None:
+        for release in self.releases:
+            with self.subTest(release=release["metadata"]["name"]):
+                check_litellm_release.validate_dependency_image(release)
+
+    def test_renovate_tag_update_does_not_leave_an_active_override(self) -> None:
+        for original in self.releases:
+            release = copy.deepcopy(original)
+            image = release["spec"]["values"]["image"]
+            old_digest = image["tag"].split("@", 1)[1]
+            image["tag"] = "latest@sha256:" + "a" * 64
+            with self.subTest(release=release["metadata"]["name"]):
+                check_litellm_release.validate_dependency_image(release)
+                image["digest"] = old_digest
+                with self.assertRaisesRegex(ValueError, "image.digest must be explicitly empty"):
+                    check_litellm_release.validate_dependency_image(release)
+
+    def test_rejects_unpinned_dependency_images(self) -> None:
+        for original in self.releases:
+            release = copy.deepcopy(original)
+            release["spec"]["values"]["image"]["tag"] = "latest"
+            with self.subTest(release=release["metadata"]["name"]):
+                with self.assertRaisesRegex(ValueError, "immutable SHA-256 digest"):
+                    check_litellm_release.validate_dependency_image(release)
+
+    def test_requires_explicitly_disabling_chart_digest_defaults(self) -> None:
+        for original in self.releases:
+            release = copy.deepcopy(original)
+            del release["spec"]["values"]["image"]["digest"]
+            with self.subTest(release=release["metadata"]["name"]):
+                with self.assertRaisesRegex(ValueError, "image.digest must be explicitly empty"):
+                    check_litellm_release.validate_dependency_image(release)
+
+
 if __name__ == "__main__":
     unittest.main()

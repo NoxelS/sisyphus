@@ -10,6 +10,10 @@ ROOT = Path(__file__).resolve().parents[1]
 CHART = ROOT / "infrastructure/litellm/litellm-ocirepository.yaml"
 RELEASE = ROOT / "infrastructure/litellm/helmrelease.yaml"
 KUSTOMIZATION = ROOT / "clusters/sisyphus/litellm.yaml"
+DEPENDENCY_RELEASES = (
+    ROOT / "infrastructure/litellm/postgresql-helmrelease.yaml",
+    ROOT / "infrastructure/litellm/redis-helmrelease.yaml",
+)
 UPGRADE_MEMORY_BUDGET_BYTES = 4 * 1024**3
 MIGRATION_STARTUP_REQUEST_LIMIT_BYTES = 1024**3
 
@@ -80,15 +84,30 @@ def validate_documents(
         )
 
 
+def validate_dependency_image(release: dict[str, Any]) -> None:
+    """Keep Renovate's tag update authoritative in Bitnami image templates."""
+
+    name = release["metadata"]["name"]
+    image = release["spec"]["values"]["image"]
+    if re.fullmatch(r"[^@\s]+@sha256:[0-9a-f]{64}", str(image["tag"])) is None:
+        raise ValueError(f"{name} image.tag must include an immutable SHA-256 digest")
+    if image.get("digest") != "":
+        raise ValueError(
+            f"{name} image.digest must be explicitly empty so image.tag is the only digest pin"
+        )
+
+
 def main() -> None:
     chart = yaml.safe_load(CHART.read_text())
     release = yaml.safe_load(RELEASE.read_text())
     kustomization = yaml.safe_load(KUSTOMIZATION.read_text())
     try:
         validate_documents(chart, release, kustomization)
+        for dependency in DEPENDENCY_RELEASES:
+            validate_dependency_image(yaml.safe_load(dependency.read_text()))
     except (KeyError, TypeError, ValueError) as exc:
         raise SystemExit(f"LiteLLM deployment check failed: {exc}") from exc
-    print("LiteLLM deployment is safe for single-node upgrades")
+    print("LiteLLM release and dependency image checks passed")
 
 
 if __name__ == "__main__":

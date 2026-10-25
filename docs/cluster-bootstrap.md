@@ -453,6 +453,17 @@ branches may squash-merge after `static-checks`. Major upgrades, Talos,
 Kubernetes, Cilium, Tailscale, observability charts, storage, and database
 changes remain for review. No automation pushes directly to `main`.
 
+LiteLLM's Bitnami PostgreSQL and Redis images keep their immutable digest in
+`image.tag` as `latest@sha256:...`, with `image.digest: ""` explicitly disabling
+the chart's higher-priority digest override. Renovate updates the tag field;
+a second, nonempty `image.digest` would silently keep deploying the old image.
+The LiteLLM validation check rejects nonempty overrides and unpinned images.
+Before merging an image update, inspect the application version at both digests
+because `latest` can cross major versions, and render the digest-pinned chart
+with the repository values to verify its effective image and unchanged volume
+configuration. Persistent PostgreSQL updates need a recoverable backup; major
+versions additionally need a tested migration and rollback procedure.
+
 The three existing Flux branches were aligned to `main` on 2026-10-01 after
 verifying their generated image manifests had no unmerged changes. If an older
 branch is restored, verify its image changes and synchronize it with current
