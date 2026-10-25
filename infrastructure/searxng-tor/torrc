@@ -1,6 +1,6 @@
 SocksPort 0.0.0.0:9050
 ControlPort 127.0.0.1:9051
-CookieAuthentication 0
+CookieAuthentication 1
 DataDirectory /var/lib/tor
 RunAsDaemon 0
 AvoidDiskWrites 1
