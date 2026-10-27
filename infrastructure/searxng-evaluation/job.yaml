@@ -24,7 +24,7 @@ spec:
       containers:
         - name: evaluate
           # Reuse the pinned Tor image's Python standard library.
-          image: docker.io/hapheus/torproxy:v1.5.0@sha256:0debf3a098da2eb4f0b3d5509c5a5a47d339e63510bdea54316d5a290d969b3e
+          image: docker.io/hapheus/torproxy:v1.6.0@sha256:3ef94a8ebe9b1a11ebad7ba21816ec7c9047d3b9fa36157c68a1792fcbdf59b0
           command: ["python3", "-u", "/evaluation/evaluate.py"]
           env:
             - name: MALG_SEARCH__URL
