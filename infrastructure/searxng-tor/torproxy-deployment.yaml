@@ -28,7 +28,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: torproxy
-          image: docker.io/hapheus/torproxy:v1.6.0@sha256:3ef94a8ebe9b1a11ebad7ba21816ec7c9047d3b9fa36157c68a1792fcbdf59b0
+          image: docker.io/hapheus/torproxy:v1.6.1@sha256:d08e73e4f0c7674c79cd1e5bfd22cdee615772b7ec0675bad32f1ba1b4480535
           imagePullPolicy: IfNotPresent
           ports:
             - name: socks
