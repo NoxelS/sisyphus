@@ -29,7 +29,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: laya
-          image: ghcr.io/noxels/sisyphus-laya-english:build-29@sha256:8cf2eec4dfd42945d348671027d7f96994864ba1b9fc7ff781c1e601c2edc46d # {"$imagepolicy": "flux-system:laya"}
+          image: ghcr.io/noxels/sisyphus-laya-english:build-31@sha256:950d45e8661e3581f94d19b4f6435a63d5d41015f253f7e783b1dff6144a6072 # {"$imagepolicy": "flux-system:laya"}
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
