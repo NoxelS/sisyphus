@@ -36,7 +36,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: lightpanda
-          image: lightpanda/browser:1.0.2@sha256:5d1d724c476957d8c2f8393a51fd089477523b0e5aa9c783c48688785d934fb9
+          image: lightpanda/browser:1.0.3@sha256:d901cf2374b8372935f690da1db896b8c1d5317022d462fdceeaf4813e8be724
           imagePullPolicy: IfNotPresent
           command:
             - /bin/lightpanda
