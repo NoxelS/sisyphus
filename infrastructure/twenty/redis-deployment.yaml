@@ -28,7 +28,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: redis
-          image: redis:7.4.12@sha256:bd28fff4b665fdf1b73e8b5b73ec05d2f858f4fa3c8ea0d7c9bc09f7f6bf7039
+          image: redis:7.4.12@sha256:2e3eb11462c4e3759e6972678dd051d150ff54b1e60714b3c33b701260172a90
           imagePullPolicy: IfNotPresent
           args: ["--appendonly", "yes", "--maxmemory-policy", "noeviction"]
           ports:
