@@ -7,5 +7,5 @@ spec:
   interval: 1h
   url: oci://registry-1.docker.io/bitnamicharts/postgresql
   ref:
-    tag: 18.12.16
-    digest: sha256:c084d2cff9eec955f62aa1bf385b56ebd85f465a01712cc2475fd9a715419cac
+    tag: 18.12.19
+    digest: sha256:9c59d7935bc016340f30444d02a6e37c616b1cf31287236da585bb8b8a8f9139
