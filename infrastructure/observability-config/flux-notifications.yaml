@@ -7,7 +7,7 @@ spec:
   type: alertmanager
   address: http://monitoring-alertmanager.monitoring.svc.cluster.local:9093/api/v2/alerts/
 ---
-apiVersion: notification.toolkit.fluxcd.io/v1beta3
+apiVersion: notification.toolkit.fluxcd.io/v1
 kind: Alert
 metadata:
   name: reconciliation-errors
@@ -31,7 +31,7 @@ spec:
     - kind: ImageUpdateAutomation
       name: "*"
 ---
-apiVersion: notification.toolkit.fluxcd.io/v1beta3
+apiVersion: notification.toolkit.fluxcd.io/v1
 kind: Alert
 metadata:
   name: successful-deployments
