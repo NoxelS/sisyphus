@@ -66,7 +66,7 @@ spec:
     lens:
       enabled: true
       url: http://lens.lens.svc.cluster.local:4318
-      publicUrl: http://lens.lens.svc.cluster.local:4318
+      publicUrl: https://lens.noel.fyi
       gatewaySecret:
         name: lens-connection
       serviceTokenSecret:

@@ -1,12 +1,18 @@
 # Lens
 
-Lens is a separate service connected to LiteLLM. Its UI is accessed through the
-LiteLLM dashboard at `https://ai.noel.fyi`; it uses LiteLLM's existing user and
-team permissions. The Lens Service and ClickHouse are private to the cluster.
-The configured ingestion address is `http://lens.lens.svc.cluster.local:4318`
-and is reachable only from explicitly permitted cluster workloads. Agent
-instrumentation, tracing keys, and any externally reachable ingestion route
-are separate follow-up work.
+Lens is a separate service connected to LiteLLM. Its standalone UI and public
+tracing endpoint use `https://lens.noel.fyi`. In the Cloudflare dashboard, add a
+public hostname for `lens.noel.fyi` to the existing tunnel, targeting
+`http://lens.lens.svc.cluster.local:4318`. The Lens network policy allows the
+`cloudflared` pods to reach that Service. The hostname is not reachable until
+that route is configured and DNS is active.
+
+LiteLLM connects to Lens privately at `http://lens.lens.svc.cluster.local:4318`.
+The same address can be used for in-cluster trace ingestion by workloads allowed
+by the Lens network policy. External agents use `https://lens.noel.fyi/v1/traces`
+with a dedicated tracing key. The public route makes Lens's authenticated UI and
+trace ingestion endpoint reachable; protect administrator credentials and tracing
+keys, and configure Cloudflare access controls as appropriate.
 
 Lens and ClickHouse run on the single Sisyphus node. ClickHouse uses a 20 GiB
 `local-path` volume with a 14-day retention setting. This volume is node-local,

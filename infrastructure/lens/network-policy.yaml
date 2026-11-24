@@ -11,6 +11,14 @@ spec:
   ingress:
     - fromEndpoints:
         - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cloudflare-tunnel
+            k8s:app.kubernetes.io/name: cloudflared
+      toPorts:
+        - ports:
+            - port: "4318"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
             k8s:io.kubernetes.pod.namespace: litellm
             k8s:app.kubernetes.io/name: litellm
             k8s:app.kubernetes.io/instance: litellm

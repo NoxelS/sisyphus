@@ -31,8 +31,8 @@ spec:
                 name: lens-clickhouse
               $patch: delete
   values:
-    publicUrl: https://ai.noel.fyi
-    ingestionUrl: http://lens.lens.svc.cluster.local:4318
+    publicUrl: https://lens.noel.fyi
+    ingestionUrl: https://lens.noel.fyi
     adminTokenSecret:
       name: lens-admin
     gateway:
