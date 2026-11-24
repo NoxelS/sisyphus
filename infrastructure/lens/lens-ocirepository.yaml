@@ -1,0 +1,11 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: lens
+  namespace: lens
+spec:
+  interval: 1h
+  url: oci://ghcr.io/berriai/charts/lens
+  ref:
+    tag: 0.4.0
+    digest: sha256:6e413472610df1e3246af80be738ef392ccf322e27dd483c05e01be29dcd2900

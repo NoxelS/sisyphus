@@ -13,6 +13,7 @@ resources:
   - observability.yaml
   - observability-config.yaml
   - kite.yaml
+  - lens.yaml
   - litellm.yaml
   - cloud-colony.yaml
   - malg.yaml

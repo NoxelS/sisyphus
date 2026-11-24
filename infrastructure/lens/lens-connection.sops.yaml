@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: lens-connection
+    namespace: lens
+type: Opaque
+stringData:
+    service-token: ENC[AES256_GCM,data:3CySRCn1ODYI7eR+PfSS0Il2xviJU7QiBGtBYtnJ0uNd03ofrdAHlGOYJduhCOW1uRH8uem702OTy5KUCb/ezA==,iv:JTIEEvcwilLiMxzOB6NtUDHq/rs2A+j46TBiHIjBITE=,tag:fa30kfl7TJ4Jzz7ja9ZsIg==,type:str]
+    gateway-secret: ENC[AES256_GCM,data:dbZichkl5yftj3lbrgaBAtb0EbLhT4j8RSJ2Vh+hKPOyPryIAqFvEblLV1g+WEYK1kg6IbKaMFf/L2qbiIpXCg==,iv:iu90JZnpb0SDxlq/dJu50DLEf3vQLlPZUzzROfSBE5Y=,tag:6KceZI7GYWbIuqEnyrGNcQ==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBpNXF6eTN2OWxZT2xib1E4
+            b1FhNEVNTmlWUVF4QVcxNGRqK1UyUk5YSzFRCkNTL1doN0JnY3g3S29qV2M0UTBW
+            UFZIb3ZMYTFhcnU1L2lOYXIvWkp3d00KLS0tIGZ0OHRiazFNMS9PL24ybFd0VlBr
+            UEJDOHBLTTZYY0hsUmpWeXh1MWZHUkEKnxgsqPU7Fx+Ha8atC3RsJkEzwxzQHVpi
+            XUStToyVn5VYlYHfktFH8F0PWnRT0seSumIzBpsUWobfNfWqj1GP0A==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age18rzcjdhhf4kdfnkjnj7uwmtt36lu5r3kzvdfpdeu78kau73ekqgsfh222y
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB3Y0Z6b2tGMUd2aGZQRGcw
+            c3BVdUFaRmM3WXlSbjhsSDZyaU1iOE0rbWlvCnF6NjJwK0MyVVBjQzUySjcvWlFm
+            RlZiWjFTV3lVdVBtSjRZekRtaTBPck0KLS0tIE5yRDV0ZVJmVWVaQktDd2JKZlh2
+            UFNCbi92dXJoWEtKUkFFYlZlSE1uY2MK6pzYAOQRBNdur3DRUl7Vimdnc6xIt873
+            dR2mmZmCspccR1cH9GTxPjt1xA6yaL/STtbq0zVgiO/ysHCd6UOxwA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1z9y7aurkjwxu75dckqnt27f0kds4tecf9m9ctpptg43e9un7vp6qpf8ext
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-24T17:52:14Z"
+    mac: ENC[AES256_GCM,data:tSicjnQ1yYiry+mTHQ3+SGsMOxsjCWQu4iIP07xFSeLuOpO3BKZdD5oGcN13LvG4qlqApQym32nMBcfaO7HOnssjJH3WPbt4bTCfca/Ob9YpFCVI1S/xKs2LaxxMiZYPcEUo9XHzb47F4tWwS8gkhkI+HB5TpdBfjtM4FiS6Q+4=,iv:PGzhcQO33jwt38SWCO4RW7njV4NwdRK5p447BP+tQ3k=,tag:9QHbMc2+OiwMG7dztOZCPw==,type:str]
+    version: 3.13.3

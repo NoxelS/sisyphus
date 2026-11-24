@@ -71,6 +71,7 @@ the documented Talos, Cilium, and Flux bootstrap boundary.
 
 - [Bootstrap, recovery, and operations](docs/cluster-bootstrap.md)
 - [Portfolio production, Cloudflare route, and rollback](docs/portfolio.md)
+- [Lens tracing service and recovery](docs/lens.md)
 - [Repository rules for contributors and agents](AGENTS.md)
 - [Cluster reconciliation root](clusters/sisyphus/kustomization.yaml)
 - [Infrastructure manifests](infrastructure/)
