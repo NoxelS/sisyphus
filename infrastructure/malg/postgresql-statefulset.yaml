@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/part-of: malg
 spec:
   serviceName: postgresql
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: postgresql
