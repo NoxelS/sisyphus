@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: lens-model-gateway
+    namespace: lens
+type: Opaque
+stringData:
+    api-key: ENC[AES256_GCM,data:nM54u/bA/vgFM55tzQinjz/KkhaKtgmWZw==,iv:Fp9v5fA2bGlH0jnvZPjiDAcnS0BRv5MW8CTt++scqXc=,tag:WZm1Xb3bVlFSx8pZ1Dt5ug==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB3aWl2YnViRDNlUzBQOEYw
+            Wi9hL3Q5ci9IMzZhT0MwWnhFUGVrWGtWTmh3ClZveHgxaUxMU3RYcFBoMVIxTzAw
+            NTRzM0w3Q2U4dkJSRGh1eld4Nlg0WnMKLS0tIHg4K3Z5aUhCRms5OVVybUEwU2kw
+            eCt1RnlFUWRhSm4rTUs2eUkxU0RrMncKtjgy8z0B4KXeh3Mak4rrOR58gA+zNRUX
+            AZ2JDbbTD/Q4lGgu7VcN+q5ExK6Q6Bd7bowuG5IgO43oBlu7EHKSKA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age18rzcjdhhf4kdfnkjnj7uwmtt36lu5r3kzvdfpdeu78kau73ekqgsfh222y
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBWbFlzVjlHUkxkZjBqVmNl
+            Tkd6NjEwVW5YcjhPNUVrZzkyMVZiWDhCRGlzCmZrelNPQjQ3ci8yeWNINXA3RTJl
+            UWRUYW9YNkJiYkg4bUc3SFFGT29lRTgKLS0tIDFYdjE2emh5VlkzajZRRGx1M29V
+            dDdIZytuS1JRSDZoR3gyZ056OXJHQ1kKeXSnYjqLvOgWe6rrMMAb1kHV4Y+Nhh83
+            7oIr/pJNNg5Zu8596X6cYTwBHDbjtUfWvs7RqB9kGjjskrBWPU/Xug==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1z9y7aurkjwxu75dckqnt27f0kds4tecf9m9ctpptg43e9un7vp6qpf8ext
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-24T19:16:14Z"
+    mac: ENC[AES256_GCM,data:pPdFRbfJKHBkYzmkCHIDvjDAgnIQimN3Q0nG4HvobY+k9qq2HmAfBKqWxRtpt7E/RfebzCxPVlZXM3iPVaD0uii+hYAUevZhs3ENLD8KVNevpSVlN4b6tUC/W1D3Inve5jgu0LP3kuouqAk5Gm2JOj8ISLf9dAuxLvD2t7AI1T8=,iv:PBMfUG/IpqV99f+Cy2CGyyIXXr72DeHXvhUMm4uovoo=,tag:nuT53dzzxrKXu49QBDGcoA==,type:str]
+    version: 3.13.3

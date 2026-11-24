@@ -49,6 +49,15 @@ spec:
         - ports:
             - port: "4000"
               protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: lens
+            k8s:app.kubernetes.io/instance: lens
+            k8s:app.kubernetes.io/component: lens
+      toPorts:
+        - ports:
+            - port: "4000"
+              protocol: TCP
   egress:
     - toEndpoints:
         - matchLabels:

@@ -5,6 +5,7 @@ resources:
   - lens-admin.sops.yaml
   - lens-clickhouse.sops.yaml
   - lens-connection.sops.yaml
+  - lens-model-gateway.sops.yaml
   - lens-ocirepository.yaml
   - helmrelease.yaml
   - network-policy.yaml
