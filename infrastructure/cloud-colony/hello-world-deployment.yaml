@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world
+  namespace: cloud-colony
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hello-world
+      app.kubernetes.io/instance: hello-world
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hello-world
+        app.kubernetes.io/instance: hello-world
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 40
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: hello-world
+          image: ghcr.io/noxels/cloud-colony-hello-world:sha-71089ba3f6e38179f7165d68258b01411e92690f@sha256:918e01b552b8768553236aba8587ec9ad1567d2eb93d242e8ea37de1bf31a564
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: A2A_BASE_URL
+              value: http://hello-world.cloud-colony.svc.cluster.local:8080
+            - name: LITELLM_BASE_URL
+              value: http://litellm.litellm.svc.cluster.local:4000/v1
+            - name: LITELLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hello-world-runtime
+                  key: LITELLM_API_KEY
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http

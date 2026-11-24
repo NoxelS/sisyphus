@@ -14,6 +14,7 @@ resources:
   - observability-config.yaml
   - kite.yaml
   - litellm.yaml
+  - cloud-colony.yaml
   - malg.yaml
   - searxng-tor.yaml
   - searxng-evaluation.yaml
