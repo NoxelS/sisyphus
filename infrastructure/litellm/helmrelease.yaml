@@ -63,6 +63,14 @@ spec:
       enabled: false
     masterkeySecretName: litellm-runtime
     masterkeySecretKey: masterkey
+    lens:
+      enabled: true
+      url: http://lens.lens.svc.cluster.local:4318
+      publicUrl: http://lens.lens.svc.cluster.local:4318
+      gatewaySecret:
+        name: lens-connection
+      serviceTokenSecret:
+        name: lens-connection
     proxy_config:
       agents:
         - agent_name: hello-world
@@ -109,6 +117,9 @@ spec:
           model_info:
             mode: chat
       general_settings:
+        tracing:
+          store:
+            type: lens
         pass_through_endpoints:
           - path: /laya-native/v1/systemone
             target: http://laya.litellm.svc.cluster.local:8000/v1/systemone

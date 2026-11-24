@@ -1,0 +1,46 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: lens
+  namespace: lens
+spec:
+  interval: 30m
+  timeout: 15m
+  chartRef:
+    kind: OCIRepository
+    name: lens
+    namespace: lens
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  postRenderers:
+    - kustomize:
+        patches:
+          # The chart creates this Secret itself. SOPS owns it in Git instead.
+          - target:
+              version: v1
+              kind: Secret
+              name: lens-clickhouse
+            patch: |
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: lens-clickhouse
+              $patch: delete
+  values:
+    publicUrl: https://ai.noel.fyi
+    ingestionUrl: http://lens.lens.svc.cluster.local:4318
+    adminTokenSecret:
+      name: lens-admin
+    gateway:
+      enabled: true
+      secretName: lens-connection
+    serviceTokenSecret:
+      name: lens-connection
+    clickhouse:
+      storageClassName: local-path
+      storage: 20Gi
+    retentionDays: 14
