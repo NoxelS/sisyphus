@@ -64,6 +64,24 @@ spec:
     masterkeySecretName: litellm-runtime
     masterkeySecretKey: masterkey
     proxy_config:
+      agents:
+        - agent_name: hello-world
+          agent_card_params:
+            name: Hello World
+            description: Returns a model-generated hello-world greeting.
+            url: http://hello-world.cloud-colony.svc.cluster.local:8080/
+            protocolVersion: "1.0"
+            version: "1.0.0"
+            capabilities:
+              streaming: false
+            defaultInputModes: [text/plain]
+            defaultOutputModes: [text/plain]
+            skills:
+              - id: greet
+                name: Greet
+                description: Send a text message to receive a greeting.
+                tags: [greeting]
+                examples: [Hello]
       model_list:
         - model_name: qwen3.8-27b
           litellm_params:
