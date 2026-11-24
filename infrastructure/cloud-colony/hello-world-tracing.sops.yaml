@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: hello-world-tracing
+    namespace: cloud-colony
+type: Opaque
+stringData:
+    LITELLM_TRACING_KEY: ENC[AES256_GCM,data:hvVR5vgeGFZ5V7fP1gO9hV1Vtsty2jtqsFw3PKtgs02UeFy84eqwLkVYNY7ULuLQ3D0MUYkNWcWl62PC3fpmq7kHl0R9qOwDJie0+w==,iv:qaz7/xBDtyJl9h/Eof/DzSD/rceF2ZAd4AUiB0TpRaE=,tag:yEZgsgB9gNnYYmorMfFBaA==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA1bi9VcWVUVTJsNUhhdS9p
+            VUYzc1RVWUw5NXVlUHJlc3RiT3BMWE83ZDJNCkZmdVgzbnJreklZNzZwSE1BV2pr
+            TWZ1WE5GRGNYTzdaQjNUSDFMRHd0dDgKLS0tIGJuSEU0STRJb0QxWktuWXhFU2Qv
+            RnpSMG9ScmxmWGVVSnk2Q3dsOC8zRVEKT9df129t4ts/Fkjt2cWLJeFAk9ZuVemx
+            CKGHqTkO0EDOISAS0RLGofgdnzVk2Yb1JRL2DhlyA4pW8ewZ5Y6nPQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age18rzcjdhhf4kdfnkjnj7uwmtt36lu5r3kzvdfpdeu78kau73ekqgsfh222y
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBqT08vclJMOXhYQm9ab0pD
+            K2wwbkozbWdMUGJzQktBdm80RGtkU0JkaEM0CktvdzNiNGJ2YkY1elFvNXB3OER6
+            SFg0Tm1ZVXg1VHZhUlBpNGJaNjdtWlkKLS0tICtqZVozNUJoLzdoYklmWUlXTE1Z
+            RnNkODBUQlR2TmpKUGo0eTdLeUkzK0EK6znyNLV1jyQW8nigZLNjj2P36+G8jEu8
+            T6CawNoQmgoNXSSA9nfi9dglWIOqzCpMUtweU0KecYz8DFfvY3JJNA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1z9y7aurkjwxu75dckqnt27f0kds4tecf9m9ctpptg43e9un7vp6qpf8ext
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-24T19:23:49Z"
+    mac: ENC[AES256_GCM,data:+bIpg5OtJccCSi6j0MsIEdERrr7k2VQndE3iOAXdf+x6tpZm3Ts1uYWBfIJ+EXSXDRMji9UxFUgYA4BIOejPtcXuhhFt1pTCu7EmlKpVs05bDvNBruFbEPAe07VfEbEJgwcOX5S1Xy0KGsp66n/D5pn6Yy465/Jj223cQ2MXvrk=,iv:ZXUkKlNCnu8fV+TaAxaNfsHm3tHSFk9q/3tzRwTQwoo=,tag:ed4+wpYPGQ5DwqZ/zdhw7Q==,type:str]
+    version: 3.13.3
