@@ -7,5 +7,5 @@ spec:
   interval: 1h
   url: oci://ghcr.io/berriai/litellm-helm
   ref:
-    tag: 1.106.6
-    digest: sha256:b681a4cb1eafd4c8aa642b58e9666d9f8afb9c4972d2230d91b2b1dfecf8f934
+    tag: 1.110.3
+    digest: sha256:e6dd6be94f1ba8eeb9ad0356e1132b4e4b927612003a70a098c0659b6d5a18ed
