@@ -26,7 +26,7 @@ spec:
     numWorkers: 1
     image:
       repository: ghcr.io/berriai/litellm
-      tag: v1.106.6@sha256:37e2dafb088a7723beb998590682957386dfc83ffea1848486f8e0e5cfac0b06
+      tag: 1.110.3@sha256:1050d2c9ca58399de9cd51df6eb503812af697717f54d2f08c1c30589c75e1f7
       pullPolicy: IfNotPresent
     serviceAccount:
       create: true
