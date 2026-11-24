@@ -30,6 +30,30 @@ spec:
               metadata:
                 name: lens-clickhouse
               $patch: delete
+          # Lens chart 0.4.0 has no extra environment values.
+          - target:
+              group: apps
+              version: v1
+              kind: Deployment
+              name: lens
+            patch: |
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: lens
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - name: lens
+                        env:
+                          - name: LENS_GATEWAY_API_BASE
+                            value: http://litellm.litellm.svc.cluster.local:4000
+                          - name: LENS_GATEWAY_API_KEY
+                            valueFrom:
+                              secretKeyRef:
+                                name: lens-model-gateway
+                                key: api-key
   values:
     publicUrl: https://lens.noel.fyi
     ingestionUrl: https://lens.noel.fyi

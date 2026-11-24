@@ -105,6 +105,8 @@ spec:
           model_info:
             mode: chat
             max_input_tokens: 262144
+            # Completion allowance verified against Solheim for Lens discovery.
+            max_output_tokens: 16384
         - model_name: laya-english
           litellm_params:
             model: openai/laya-english
