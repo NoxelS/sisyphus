@@ -36,6 +36,15 @@ spec:
               protocol: TCP
     - toEndpoints:
         - matchLabels:
+            k8s:io.kubernetes.pod.namespace: lens
+            k8s:app.kubernetes.io/instance: lens
+            k8s:app.kubernetes.io/component: lens
+      toPorts:
+        - ports:
+            - port: "4318"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
             k8s:io.kubernetes.pod.namespace: kube-system
             k8s:k8s-app: kube-dns
       toPorts:

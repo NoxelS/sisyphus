@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - hello-world-runtime.sops.yaml
+  - hello-world-tracing.sops.yaml
   - hello-world-deployment.yaml
   - hello-world-service.yaml
   - network-policy.yaml
