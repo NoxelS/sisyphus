@@ -33,7 +33,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: quizz-demo
-          image: ghcr.io/noxels/quizz-demo:f6adaeb82b90d68c525fcbd12d085f53d69065a1 # Replace with the published, verified main image digest before enabling.
+          image: ghcr.io/noxels/quizz-demo:d83ddaf3909b19fdc4a56a2c3ed9ccece9d2c1d8@sha256:d2932cd78123bf5fb7b8b25a9bad7b2c7648dade1885e504cbced1f8d7c3b609
           imagePullPolicy: IfNotPresent
           env:
             - name: DATABASE_URL

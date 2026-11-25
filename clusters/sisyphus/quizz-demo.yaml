@@ -4,7 +4,6 @@ metadata:
   name: quizz-demo
   namespace: flux-system
 spec:
-  suspend: true # Enable only after the quiz image and route are ready.
   interval: 10m
   path: ./infrastructure/quizz-demo
   prune: true
