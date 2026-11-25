@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: quizz-demo
+resources:
+  - namespace.yaml
+  - runtime.sops.yaml
+  - database.yaml
+  - app.yaml
+  - network-policy.yaml
+configMapGenerator:
+  - name: quizz-schema
+    files:
+      - 001_create_leads.sql
+      - 002_calendly_events.sql

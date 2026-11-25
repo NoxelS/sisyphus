@@ -1,0 +1,48 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: quizz-demo
+spec:
+  endpointSelector:
+    matchLabels: {app: quizz-demo}
+  ingress:
+    - fromEntities: [host]
+      toPorts:
+        - ports: [{port: "3000", protocol: TCP}]
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: cloudflare-tunnel
+            k8s:app.kubernetes.io/name: cloudflared
+      toPorts:
+        - ports: [{port: "3000", protocol: TCP}]
+  egress:
+    - toEndpoints:
+        - matchLabels: {app: quizz-postgresql}
+      toPorts:
+        - ports: [{port: "5432", protocol: TCP}]
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports: [{port: "53", protocol: UDP}, {port: "53", protocol: TCP}]
+          rules:
+            dns:
+              - matchPattern: "*"
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: quizz-postgresql
+spec:
+  endpointSelector:
+    matchLabels: {app: quizz-postgresql}
+  ingress:
+    - fromEntities: [host]
+      toPorts:
+        - ports: [{port: "5432", protocol: TCP}]
+    - fromEndpoints:
+        - matchLabels: {app: quizz-demo}
+      toPorts:
+        - ports: [{port: "5432", protocol: TCP}]
+  egress: []
