@@ -1,0 +1,22 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: quizz-demo
+  namespace: flux-system
+spec:
+  suspend: true # Enable only after the quiz image and route are ready.
+  interval: 10m
+  path: ./infrastructure/quizz-demo
+  prune: true
+  wait: true
+  timeout: 10m
+  dependsOn:
+    - name: storage
+    - name: cilium
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age

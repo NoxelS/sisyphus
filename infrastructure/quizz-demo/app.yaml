@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: quizz-demo
+spec:
+  selector:
+    app: quizz-demo
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quizz-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quizz-demo
+  template:
+    metadata:
+      labels:
+        app: quizz-demo
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: quizz-demo
+          image: ghcr.io/noxels/quizz-demo:f6adaeb82b90d68c525fcbd12d085f53d69065a1 # Replace with the published, verified main image digest before enabling.
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: quizz-runtime
+                  key: database-url
+            - name: CALENDLY_WEBHOOK_SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: quizz-runtime
+                  key: calendly-signing-key
+          ports:
+            - name: http
+              containerPort: 3000
+          startupProbe:
+            httpGet: {path: /api/health, port: http}
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet: {path: /api/ready, port: http}
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: /api/health, port: http}
+            periodSeconds: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            readOnlyRootFilesystem: true
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {cpu: "1", memory: 512Mi}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
