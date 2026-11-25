@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: quizz-runtime
+    namespace: quizz-demo
+type: Opaque
+stringData:
+    postgres-password: ENC[AES256_GCM,data:JOx0BR1v7LfQZuTuQL7s8jJvBdzCi/0xGXS5orDt710rNHF4VGtSLwtdVOXOsCi+,iv:7FfqALoyCUr9IYm+ImjwiMEsjoeXNVBk4V+/el9AlLM=,tag:WFlkkw4f7PqVd1XsuE5DyQ==,type:str]
+    database-url: ENC[AES256_GCM,data:dxZBA8V+1QTPO4a8/iFncxsWd4oA2prQU9t0vSX7H5OKb47g/H+Rk9ObjzF0NDYZyEeoZQdV/7BhLNi5H5t0Aqx5q/kjWDp0Pr8M+U8zbk0ddEsAHZe5xvZ+iJ3T5gnJ3vBpxgnzl3XcsF0szCJzi2avsB4=,iv:ryPLqh8vC1oWQEMisSh29lbAWJ1fHCOSBrXJ4wBf0VM=,tag:ajtT9cwsUIzi4OewmSNEjg==,type:str]
+    calendly-signing-key: ENC[AES256_GCM,data:6qL8EoV6fyDfPi7GJifRSCTtQWIPc+/aQDFt4IMjxKK+NNVWxHuVtuuDA3PDnmueFckbJCvTte4SR9kSDZv0FQ==,iv:+e5xQUOpWwIZI2NI3QDMXVbZE1l76R3VKfSmiC/RbxE=,tag:wEBqxBJBrWVsc9DnmIV+6A==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBuK2FOT3JZcVpuanI0Z1Fq
+            REJsbWRGWHZJbEhxUVUzY2x0TFpna1JtbTJjCkRGdlFGb3dnczZKSWlzRjNUNmI0
+            ekZJTFRlU0R2VUJTNGxwcDZxSE9iTzgKLS0tIC9NZEIrZ3VIKzJaWlFwZk0wc0Zq
+            bHZWL2FKcCs1RFBrNUw3UVprRXBseU0KQN8j+jPQ05gyAbMB1xTX7tX/f0dJTCs1
+            +qOLnQQDGFhKJOUm04Kt/FAQII4OZ9xLSHNFM3JGEhfXRW3NKtwgTg==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age18rzcjdhhf4kdfnkjnj7uwmtt36lu5r3kzvdfpdeu78kau73ekqgsfh222y
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA4TVA2dy8zd0p6VUhadzc2
+            MnpwdHNhVTFVNk5iNzJvSnRGOXV0N0FBd1JFCnRzWXloQ2J5Qm5URG52UytkWDgx
+            ZkI3SlpBcFMyRzYwaUEzU2ZCZTZkMXcKLS0tIEI5MjJMVUFacVpoWEFRN1c4b2Rt
+            Z0Fuc0VDMnJhV0JVREFLaWtGZE5aTW8K3GwUUvw0fBDk+WlSAb9apPfNIY03b/rS
+            H6d3eQH/DmfboDwjO4lbP1UM5CuBg5CU8+wV8AxSBXGFK+9YLxRCDg==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1z9y7aurkjwxu75dckqnt27f0kds4tecf9m9ctpptg43e9un7vp6qpf8ext
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-25T12:19:51Z"
+    mac: ENC[AES256_GCM,data:J599sW6jSa6XtdYcw8sfAHif/bFefQ51lWq3rqHk9QCnBWjTFcIfgxkGUoRyL4MJDTDIEPFFVE8XDO0iQJcbv4DWmeFMiaSCW3J334NdL2tD8bbMEW/TFOHDxS/G8QLFAzLjMvbhLank4gyhNzrfHrtay8n2EWi26vvLVU9TyVg=,iv:gL93c1Q+YhDyF94/3fcJ3s3PZ2D4hrU4Ha/X3c7KdJU=,tag:sv8fQ/zkNPD7Vo6QgbkXMg==,type:str]
+    version: 3.13.3

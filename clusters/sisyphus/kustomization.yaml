@@ -21,3 +21,4 @@ resources:
   - searxng-evaluation.yaml
   - portfolio-staging.yaml
   - portfolio-production.yaml
+  - quizz-demo.yaml
