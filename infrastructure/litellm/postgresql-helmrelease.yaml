@@ -22,7 +22,7 @@ spec:
       registry: registry-1.docker.io
       repository: bitnami/postgresql
       # This chart publishes `latest`; digest is the immutable source of truth.
-      tag: latest@sha256:889db6427034525f50071945ddf808fbb77f8a52c2c8d3a7a75d39a167373566
+      tag: latest@sha256:17db3b66b9701262c495a5463605e75e8de1909c9c7e6c2b3cfe6b4c6958542a
       digest: sha256:889db6427034525f50071945ddf808fbb77f8a52c2c8d3a7a75d39a167373566
     auth:
       existingSecret: postgresql-credentials
