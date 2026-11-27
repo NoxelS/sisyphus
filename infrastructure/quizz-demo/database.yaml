@@ -42,7 +42,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: postgresql
-          image: postgres:16@sha256:9e2cf6287f25c3151f4c9421ccce2b17f3e60061c111a29165e0d2cdd9ff0a97
+          image: postgres:19@sha256:4ea94de574c17f0372722806c949757050fbb1cd7648410fe45d6bba275cc00e
           env:
             - name: POSTGRES_DB
               value: quiz
