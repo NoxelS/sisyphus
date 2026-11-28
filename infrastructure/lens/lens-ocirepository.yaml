@@ -7,5 +7,5 @@ spec:
   interval: 1h
   url: oci://ghcr.io/berriai/charts/lens
   ref:
-    tag: 0.4.0
-    digest: sha256:6e413472610df1e3246af80be738ef392ccf322e27dd483c05e01be29dcd2900
+    tag: 0.6.0
+    digest: sha256:f4453b928767bb18f4291fd0fd84aeb07300ab5cf148ab57714a157741c5099a
